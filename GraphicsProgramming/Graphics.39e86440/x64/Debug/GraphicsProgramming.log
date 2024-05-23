@@ -1,4 +1,16 @@
-﻿  main.cpp
+﻿  FileLoader.cpp
+C:\Projects\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
+  (compiling source file 'FileLoader.cpp')
+  
+C:\Projects\GraphicsProgramming\FileLoader.cpp(50,14): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
+  GameManager.cpp
+  Parallel.cpp
+  Renderer.cpp
+C:\Projects\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
+  (compiling source file 'Renderer.cpp')
+  
+  ThreadPool.cpp
+  main.cpp
 C:\Projects\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
   (compiling source file 'main.cpp')
   
@@ -9,4 +21,7 @@ C:\Projects\GraphicsProgramming\main.cpp(24,6): warning C4200: nonstandard exten
   C:\Projects\GraphicsProgramming\main.cpp(24,6):
   This member will be ignored by a defaulted constructor or copy/move assignment operator
   
+  Generating Code...
+  glad.c
+  LINK : C:\Projects\GraphicsProgramming\x64\Debug\GraphicsProgramming.exe not found or not built by the last incremental link; performing full link
   GraphicsProgramming.vcxproj -> C:\Projects\GraphicsProgramming\x64\Debug\GraphicsProgramming.exe
