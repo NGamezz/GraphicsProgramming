@@ -19,6 +19,6 @@ class Renderer
 public:
 	void RenderLoop(GLFWwindow*& window);
 	void Intialize(GLuint& program);
-private:
 	void createProgram(GLuint& programId, const char* vertex, const char* fragment);
+private:
 };

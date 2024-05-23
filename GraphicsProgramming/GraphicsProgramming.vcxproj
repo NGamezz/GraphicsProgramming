@@ -144,6 +144,7 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parallel.cpp" />
+    <ClCompile Include="Print.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
   </ItemGroup>
@@ -155,12 +156,17 @@
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Parallel.h" />
+    <ClInclude Include="Print.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\simpleFragmentShader.glsl" />
+    <None Include="Shaders\simpleTerrainFragment.glsl" />
+    <None Include="Shaders\simpleTerrainVertex.glsl" />
     <None Include="Shaders\simpleVertexShader.glsl" />
+    <None Include="Shaders\skyFragmentShader.glsl" />
+    <None Include="Shaders\skyVertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Textures\container2.png" />

@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Projects\\GraphicsProgramming\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\glad.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:glad.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\glad.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:glad.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\FileLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -19,24 +19,56 @@
       "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\ThreadPool.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:ThreadPool.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Shaders\\simpleTerrainVertex.glsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Shaders\\simpleTerrainVertex.glsl||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\ActionQueue.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:ActionQueue.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Shaders\\simpleTerrainFragment.glsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Shaders\\simpleTerrainFragment.glsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Shaders\\skyVertexShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Shaders\\skyVertexShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Shaders\\simpleVertexShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Shaders\\simpleVertexShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Shaders\\simpleFragmentShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Shaders\\simpleFragmentShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Shaders\\skyFragmentShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Shaders\\skyFragmentShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\ThreadPool.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:ThreadPool.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Parallel.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Parallel.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\GameManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:GameManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Print.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Print.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Parallel.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Parallel.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\ActionQueue.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:ActionQueue.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\GameManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:GameManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\GameManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -47,20 +79,8 @@
       "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:FileLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Projects\\GraphicsProgramming\\stb_image.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:stb_image.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Shaders\\simpleFragmentShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Shaders\\simpleFragmentShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\Shaders\\simpleVertexShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|solutionrelative:Shaders\\simpleVertexShader.glsl||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{39E86440-872A-49ED-AD9C-830B0A1F187B}|GraphicsProgramming.vcxproj|C:\\Projects\\GraphicsProgramming\\ApplicationEvent.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -72,9 +92,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Projects\\include\\glm\\glm.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\include\\thread||{3B902123-F8A7-4915-9F01-361F908088D0}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -84,48 +101,50 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 15,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "thread",
-              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\include\\thread",
-              "RelativeDocumentMoniker": "..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\include\\thread",
-              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\include\\thread",
-              "RelativeToolTip": "..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\include\\thread",
-              "ViewState": "AQIAAG0AAAAAAAAAAAAawIAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-05-23T16:58:54.15Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ThreadPool.h",
-              "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\ThreadPool.h",
-              "RelativeDocumentMoniker": "ThreadPool.h",
-              "ToolTip": "C:\\Projects\\GraphicsProgramming\\ThreadPool.h",
-              "RelativeToolTip": "ThreadPool.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-05-21T21:04:51.94Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "glad.c",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\glad.c",
               "RelativeDocumentMoniker": "glad.c",
               "ToolTip": "C:\\Projects\\GraphicsProgramming\\glad.c",
               "RelativeToolTip": "glad.c",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABcAAAATAAAA",
+              "ViewState": "AQIAAOwBAAAAAAAAAAAgwAoCAAA5AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2024-05-21T19:43:14.049Z",
+              "WhenOpened": "2024-05-23T23:14:36.25Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "simpleTerrainVertex.glsl",
+              "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Shaders\\simpleTerrainVertex.glsl",
+              "RelativeDocumentMoniker": "Shaders\\simpleTerrainVertex.glsl",
+              "ToolTip": "C:\\Projects\\GraphicsProgramming\\Shaders\\simpleTerrainVertex.glsl",
+              "RelativeToolTip": "Shaders\\simpleTerrainVertex.glsl",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAALAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-05-23T21:54:09.501Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
+              "Title": "skyVertexShader.glsl",
+              "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Shaders\\skyVertexShader.glsl",
+              "RelativeDocumentMoniker": "Shaders\\skyVertexShader.glsl",
+              "ToolTip": "C:\\Projects\\GraphicsProgramming\\Shaders\\skyVertexShader.glsl",
+              "RelativeToolTip": "Shaders\\skyVertexShader.glsl",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-05-23T19:44:06.21Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
               "Title": "Parallel.cpp",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Parallel.cpp",
               "RelativeDocumentMoniker": "Parallel.cpp",
@@ -133,11 +152,12 @@
               "RelativeToolTip": "Parallel.cpp",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAAaAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-05-21T20:10:38.858Z"
+              "WhenOpened": "2024-05-21T20:10:38.858Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 14,
               "Title": "Parallel.h",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Parallel.h",
               "RelativeDocumentMoniker": "Parallel.h",
@@ -145,11 +165,12 @@
               "RelativeToolTip": "Parallel.h",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAZAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-05-21T20:10:01.343Z"
+              "WhenOpened": "2024-05-21T20:10:01.343Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 15,
               "Title": "ActionQueue.h",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\ActionQueue.h",
               "RelativeDocumentMoniker": "ActionQueue.h",
@@ -157,7 +178,8 @@
               "RelativeToolTip": "ActionQueue.h",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAACMAAAAgAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-05-21T19:40:11.672Z"
+              "WhenOpened": "2024-05-21T19:40:11.672Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -167,13 +189,14 @@
               "RelativeDocumentMoniker": "FileLoader.cpp",
               "ToolTip": "C:\\Projects\\GraphicsProgramming\\FileLoader.cpp",
               "RelativeToolTip": "FileLoader.cpp",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAEwAAAABAAAA",
+              "ViewState": "AQIAAAkAAAAAAAAAAAAAAAIAAAAmAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-05-21T17:32:49.028Z"
+              "WhenOpened": "2024-05-21T17:32:49.028Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 18,
               "Title": "FileLoader.h",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\FileLoader.h",
               "RelativeDocumentMoniker": "FileLoader.h",
@@ -185,7 +208,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 19,
               "Title": "stb_image.h",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\stb_image.h",
               "RelativeDocumentMoniker": "stb_image.h",
@@ -203,25 +226,27 @@
               "RelativeDocumentMoniker": "Renderer.cpp",
               "ToolTip": "C:\\Projects\\GraphicsProgramming\\Renderer.cpp",
               "RelativeToolTip": "Renderer.cpp",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABIAAAAkAAAA",
+              "ViewState": "AQIAACQAAAAAAAAAAAAAAAcAAAAYAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-05-20T15:40:53.4Z"
+              "WhenOpened": "2024-05-20T15:40:53.4Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "Renderer.h",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Renderer.h",
               "RelativeDocumentMoniker": "Renderer.h",
               "ToolTip": "C:\\Projects\\GraphicsProgramming\\Renderer.h",
               "RelativeToolTip": "Renderer.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABYAAAA0AAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABcAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-05-20T15:39:44.244Z"
+              "WhenOpened": "2024-05-20T15:39:44.244Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 20,
               "Title": "ApplicationEvent.h",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\ApplicationEvent.h",
               "RelativeDocumentMoniker": "ApplicationEvent.h",
@@ -233,7 +258,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 21,
               "Title": "Event.h",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Event.h",
               "RelativeDocumentMoniker": "Event.h",
@@ -245,7 +270,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 22,
               "Title": "glm.hpp",
               "DocumentMoniker": "C:\\Projects\\include\\glm\\glm.hpp",
               "RelativeDocumentMoniker": "..\\include\\glm\\glm.hpp",
@@ -257,7 +282,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 7,
               "Title": "simpleVertexShader.glsl",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Shaders\\simpleVertexShader.glsl",
               "RelativeDocumentMoniker": "Shaders\\simpleVertexShader.glsl",
@@ -265,23 +290,90 @@
               "RelativeToolTip": "Shaders\\simpleVertexShader.glsl",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAABgAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-05-13T15:51:42.371Z"
+              "WhenOpened": "2024-05-13T15:51:42.371Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 0,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\main.cpp",
+              "RelativeDocumentMoniker": "main.cpp",
+              "ToolTip": "C:\\Projects\\GraphicsProgramming\\main.cpp",
+              "RelativeToolTip": "main.cpp",
+              "ViewState": "AQIAAPsAAAAAAAAAAAAawNYBAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-05-13T15:31:44.179Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "simpleTerrainFragment.glsl",
+              "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Shaders\\simpleTerrainFragment.glsl",
+              "RelativeDocumentMoniker": "Shaders\\simpleTerrainFragment.glsl",
+              "ToolTip": "C:\\Projects\\GraphicsProgramming\\Shaders\\simpleTerrainFragment.glsl",
+              "RelativeToolTip": "Shaders\\simpleTerrainFragment.glsl",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-05-23T22:05:54.684Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "skyFragmentShader.glsl",
+              "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Shaders\\skyFragmentShader.glsl",
+              "RelativeDocumentMoniker": "Shaders\\skyFragmentShader.glsl",
+              "ToolTip": "C:\\Projects\\GraphicsProgramming\\Shaders\\skyFragmentShader.glsl",
+              "RelativeToolTip": "Shaders\\skyFragmentShader.glsl",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAAQAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-05-23T19:45:43.262Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "simpleFragmentShader.glsl",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Shaders\\simpleFragmentShader.glsl",
               "RelativeDocumentMoniker": "Shaders\\simpleFragmentShader.glsl",
               "ToolTip": "C:\\Projects\\GraphicsProgramming\\Shaders\\simpleFragmentShader.glsl",
               "RelativeToolTip": "Shaders\\simpleFragmentShader.glsl",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAALAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-05-13T15:51:41.232Z"
+              "WhenOpened": "2024-05-13T15:51:41.232Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 10,
+              "Title": "ThreadPool.h",
+              "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\ThreadPool.h",
+              "RelativeDocumentMoniker": "ThreadPool.h",
+              "ToolTip": "C:\\Projects\\GraphicsProgramming\\ThreadPool.h",
+              "RelativeToolTip": "ThreadPool.h",
+              "ViewState": "AQIAAB4AAAAAAAAAAAAAAAYAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-05-21T21:04:51.94Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Print.h",
+              "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\Print.h",
+              "RelativeDocumentMoniker": "Print.h",
+              "ToolTip": "C:\\Projects\\GraphicsProgramming\\Print.h",
+              "RelativeToolTip": "Print.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-05-23T18:36:46.502Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
               "Title": "GameManager.h",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\GameManager.h",
               "RelativeDocumentMoniker": "GameManager.h",
@@ -293,19 +385,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "main.cpp",
-              "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\main.cpp",
-              "RelativeDocumentMoniker": "main.cpp",
-              "ToolTip": "C:\\Projects\\GraphicsProgramming\\main.cpp",
-              "RelativeToolTip": "main.cpp",
-              "ViewState": "AQIAAFcAAAAAAAAAAAAwwIkAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-05-13T15:31:44.179Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 17,
               "Title": "GameManager.cpp",
               "DocumentMoniker": "C:\\Projects\\GraphicsProgramming\\GameManager.cpp",
               "RelativeDocumentMoniker": "GameManager.cpp",

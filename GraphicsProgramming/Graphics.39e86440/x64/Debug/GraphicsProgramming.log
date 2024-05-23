@@ -1,27 +1,12 @@
-﻿  FileLoader.cpp
-C:\Projects\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
-  (compiling source file 'FileLoader.cpp')
-  
-C:\Projects\GraphicsProgramming\FileLoader.cpp(50,14): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
-  GameManager.cpp
-  Parallel.cpp
-  Renderer.cpp
-C:\Projects\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
-  (compiling source file 'Renderer.cpp')
-  
-  ThreadPool.cpp
-  main.cpp
+﻿  main.cpp
 C:\Projects\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
   (compiling source file 'main.cpp')
   
 C:\Projects\GraphicsProgramming\ActionQueue.h(28,13): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Projects\GraphicsProgramming\main.cpp(24,6): warning C4200: nonstandard extension used: zero-sized array in struct/union
-  C:\Projects\GraphicsProgramming\main.cpp(24,6):
+C:\Projects\GraphicsProgramming\main.cpp(28,6): warning C4200: nonstandard extension used: zero-sized array in struct/union
+  C:\Projects\GraphicsProgramming\main.cpp(28,6):
   This member will be ignored by a defaulted constructor or copy/move assignment operator
   
-  Generating Code...
-  glad.c
-  LINK : C:\Projects\GraphicsProgramming\x64\Debug\GraphicsProgramming.exe not found or not built by the last incremental link; performing full link
   GraphicsProgramming.vcxproj -> C:\Projects\GraphicsProgramming\x64\Debug\GraphicsProgramming.exe

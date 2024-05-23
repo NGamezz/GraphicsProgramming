@@ -3,6 +3,7 @@
 #include <mutex>
 #include <queue>
 #include <functional>
+#include <iostream>
 
 class ThreadPool
 {
@@ -15,22 +16,20 @@ public:
 
 		for (unsigned int i = 0; i < numThreads; ++i)
 		{
-			threads.emplace_back([&]
+			threads.emplace_back([this]
 				{
-					while (!stop)
+					while (true)
 					{
 						std::function<void()> task;
 						{
-							std::unique_lock<std::mutex> lock(this->queue_mutex);
+							std::unique_lock<std::mutex> lock(queue_mutex);
+							condition.wait(lock, [this] { return stop || !tasks.empty(); });
 
-							this->condition.wait(lock, [&] { return this->stop || !this->tasks.empty(); });
-							
-							if (this->stop && this->tasks.empty()) {
-								break;
-							}
-							
-							task = std::move(this->tasks.front());
-							this->tasks.pop();
+							if (stop && tasks.empty())
+								return;
+
+							task = std::move(tasks.front());
+							tasks.pop();
 						}
 						task();
 					}
@@ -47,10 +46,11 @@ public:
 			stop.store(true, std::memory_order_relaxed);
 		}
 		condition.notify_all();
-		
+
 		for (std::thread& thread : threads)
 		{
-			thread.join();
+			if (thread.joinable())
+				thread.join();
 		}
 	}
 
@@ -68,6 +68,6 @@ inline void ThreadPool::enqueue(F&& task)
 	{
 		std::unique_lock<std::mutex> lock(queue_mutex);
 		tasks.emplace(std::forward<F>(task));
+		condition.notify_one();
 	}
-	condition.notify_one();
 }
