@@ -16,11 +16,14 @@ void main()
 	//Normals
 	//vec3 normal = texture(normalTex, uv).rgb;
 	//normal = normalize(normal * -2.0 + 1.0);
+	//normal.gb = normal.bg;
+	//normal.r = -normal.r;
+	//normal.b = -normal.b;
 
 	//Specular Data
 	//vec3 viewDirection = normalize(worldPosition - cameraPosition);
 	//vec3 reflDir = normalize(reflect(lightDirection, normal));
-
+	
 	float light = max(-dot(normal, lightDirection), 0.0);
 	//float specular = pow(max(-dot(reflDir, normalize(viewDirection)), 0.0f), 64);
 

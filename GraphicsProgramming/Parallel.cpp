@@ -1,16 +1,10 @@
 #include "Parallel.h"
 
-void Parallel::parallelFor(const int start, const int end, std::function<void(int)> body)
+void Parallel::parallelFor(const int start, const int end, const std::function<void(int)> body, ThreadPool& threadPool)
 {
-	std::vector<std::thread> threads;
-
-	for (int i = start; i < end; i++)
+	for (int i = start; i < end; ++i)
 	{
-		threads.emplace_back([&]() {body(i); });
+		threadPool.enqueue([=]() {body(i); });
 	}
-
-	for (auto& thread : threads)
-	{
-		thread.join();
-	}
+	return;
 }

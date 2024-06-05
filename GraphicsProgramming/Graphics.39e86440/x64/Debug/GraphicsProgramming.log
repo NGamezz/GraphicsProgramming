@@ -1,12 +1,21 @@
 ﻿  main.cpp
-C:\Projects\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
   (compiling source file 'main.cpp')
   
-C:\Projects\GraphicsProgramming\ActionQueue.h(28,13): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\ActionQueue.h(28,13): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Projects\GraphicsProgramming\main.cpp(28,6): warning C4200: nonstandard extension used: zero-sized array in struct/union
-  C:\Projects\GraphicsProgramming\main.cpp(28,6):
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(28,6): warning C4200: nonstandard extension used: zero-sized array in struct/union
+  C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(28,6):
   This member will be ignored by a defaulted constructor or copy/move assignment operator
   
-  GraphicsProgramming.vcxproj -> C:\Projects\GraphicsProgramming\x64\Debug\GraphicsProgramming.exe
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(546,47): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(546,44): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(581,45): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(581,42): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(606,30): warning C4018: '<': signed/unsigned mismatch
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(717,26): warning C4554: '>>': check operator precedence for possible error; use parentheses to clarify precedence
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(720,26): warning C4554: '>>': check operator precedence for possible error; use parentheses to clarify precedence
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(722,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\main.cpp(744,55): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+  GraphicsProgramming.vcxproj -> C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\x64\Debug\GraphicsProgramming.exe

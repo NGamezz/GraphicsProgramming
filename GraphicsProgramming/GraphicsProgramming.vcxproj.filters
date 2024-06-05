@@ -102,5 +102,11 @@
     <Image Include="Textures\container2.png">
       <Filter>Resource Files\Textures</Filter>
     </Image>
+    <Image Include="Textures\Heightmap2.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Textures\container2_normal.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

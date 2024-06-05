@@ -170,6 +170,8 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Textures\container2.png" />
+    <Image Include="Textures\container2_normal.png" />
+    <Image Include="Textures\Heightmap2.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

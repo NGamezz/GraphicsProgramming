@@ -37,12 +37,32 @@ struct WorldInformation
 	std::vector<GeometryInformation> objectsToRender;
 };
 
+struct Vertex
+{
+	unsigned int startIndex;
+	glm::vec3 position;
+	glm::vec3 normal;
+	glm::vec2 uv;
+};
+
+typedef struct
+{
+	float x, y;
+} Vector2;
+
 int init(GLFWwindow*& window);
 void CreateGeometry(GLuint& vao, GLuint& EBO, int& boxSize, int& boxIndexSize);
 void ProcessInput(GLFWwindow*& window);
 
+float static interpolate(const float a, const float b, const float value);
+Vector2 static get_random_gradient(const int ix, const int iy);
+float static dot_grid_gradient(const int ix, const int iy, const float x, const float y);
+float perlin_noise(const float x, const float z);
+
 void ProcessUniforms(unsigned int& program, WorldInformation& worldInformation, glm::mat4& worldMatrix);
 void SetupInitialWorldInformation(WorldInformation& worldInformation);
+
+float perlin_noise(float x, float z);
 
 void RenderPlane(unsigned int& planeProgram);
 unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& indexCount, unsigned int& heightmapID);
@@ -74,6 +94,7 @@ glm::quat camQuaternion = glm::quat(glm::vec3(glm::radians(cameraPitch), glm::ra
 
 //terrain data
 GLuint terrainVAO, heightMapId, terrainIndexCount;
+GLuint heightMapNormalID;
 
 int main()
 {
@@ -89,16 +110,14 @@ int main()
 	CreateGeometry(boxVao, boxEbo, boxSize, boxIndexSize);
 
 	std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>();
+
 	renderer->Intialize(simpleProgram);
 	renderer->createProgram(skyBoxProgram, "Shaders/skyVertexShader.glsl", "Shaders/skyFragmentShader.glsl");
 	renderer->createProgram(terrainProgram, "Shaders/simpleTerrainVertex.glsl", "Shaders/simpleTerrainFragment.glsl");
 
 	terrainVAO = GeneratePlane("Textures/Heightmap2.png", GL_RGBA, 4, 100.0f, 5.0f, terrainIndexCount, heightMapId);
-
-	auto diffuse = FileLoader::LoadGLTexture("Textures/container2.png");
-	auto normal = FileLoader::LoadGLTexture("Textures/container2_normal.png");
-
-	std::unique_ptr<GameManager> gameManager = std::make_unique<GameManager>(GameManager());
+	heightMapNormalID = FileLoader::LoadGLTexture("Textures/HeightmapNormal.png");
+	//GameManager gameManager;
 
 	SetupInitialWorldInformation(worldInformation);
 
@@ -108,14 +127,8 @@ int main()
 	double deltaTime = 0.0;
 	double prevousTick = 0.0;
 	double frameRate = 0.0;
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, diffuse);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, normal);
-
 	//Game render loop
+
 	while (!glfwWindowShouldClose(window))
 	{
 		//Calculate DeltaTime and FrameRate.
@@ -129,7 +142,6 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//input
-		gameManager->OnUpdate(deltaTime, window);
 		ProcessInput(window);
 
 		////rendering
@@ -178,6 +190,8 @@ void RenderPlane(unsigned int& planeProgram)
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, heightMapId);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, heightMapNormalID);
 
 	glBindVertexArray(terrainVAO);
 	glDrawElements(GL_TRIANGLES, terrainIndexCount, GL_UNSIGNED_INT, 0);
@@ -215,14 +229,17 @@ void MousePosCallBack(GLFWwindow* window, double xPos, double yPos)
 	lastY = y;
 
 	//x yaw, y pitch
-
 	cameraYaw -= dx;
-	cameraPitch = glm::clamp(cameraPitch + dy, -89.9f, 89.9f);
+	cameraPitch = std::min(89.9f, std::max(-89.9f, cameraPitch + dy));
 
 	if (cameraYaw > 180.0f)
-		cameraYaw *= -360.0f;
+	{
+		cameraYaw -= 360.0f;
+	}
 	if (cameraYaw < -180.0f)
+	{
 		cameraYaw += 360.0f;
+	}
 
 	camQuaternion = glm::quat(glm::vec3(glm::radians(cameraPitch), glm::radians(cameraYaw), 0.0f));
 
@@ -448,9 +465,32 @@ void CreateGeometry(GLuint& VAO, GLuint& EBO, int& size, int& numIndices)
 	glEnableVertexAttribArray(5);
 }
 
+static glm::vec3 create_normal(const glm::vec3 a, const glm::vec3 b, const glm::vec3 c)
+{
+	auto cross = glm::cross(b - a, c - a);
+	return glm::normalize(cross);
+}
+
+static float get_octaved_noise(const float x, const float y, const int octaves, const int size)
+{
+	float perlinValue = 0.0f;
+	float frequency = 1.0f;
+	float amplitude = 1.0f;
+
+	for (int octave = 0; octave < 12; ++octave)
+	{
+		perlinValue += perlin_noise(x * frequency / size, y * frequency / size) * amplitude;
+
+		amplitude *= 0.5f;
+		frequency *= 2;
+	}
+
+	return perlinValue;
+}
+
 unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& indexCount, unsigned int& heightmapID)
 {
-	int width, height, channels;
+	int width = 0, height = 0, channels = 0;
 	unsigned char* data = nullptr;
 	if (heightmap != nullptr)
 	{
@@ -469,38 +509,129 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 		}
 	}
 
-	int stride = 8;
-	float* vertices = new float[(width * height) * stride];
+	const int stride = 8;
+	int count = width * height;
+
+	const int gridSize = 400;
+
+	float* vertices = new float[count * stride];
 	unsigned int* indices = new unsigned int[(width - 1) * (height - 1) * 6];
 
-	int index = 0;
-	for (int i = 0; i < (width * height); i++)
+	//Calculate Batch Size
+	int threadCount = std::thread::hardware_concurrency();
+	int batchSize = count / threadCount;
+	int batches = count / batchSize;
+
+	std::vector<std::thread> threads;
+
+	std::vector<Vertex> vertexVector(count);
+
+	//Process Primary Batches.
+	for (int i = 0; i < batches; i++)
 	{
-		// TODO: calculate x/z values
-		int x = i % width;
-		int z = i / width;
+		int start = i * batchSize;
 
-		// TODO: set position
-		vertices[index++] = x * xzScale;
-		//y
-		vertices[index++] = 0;
-		vertices[index++] = z * xzScale;
+		threads.emplace_back([=, &vertices]()
+			{
+				int vertexIndex = start * 8;
+				int size = gridSize;
 
-		// TODO: set normal
-		vertices[index++] = 0;
-		vertices[index++] = 1;
-		vertices[index++] = 0;
+				for (int loopIndex = start; loopIndex < start + batchSize; ++loopIndex)
+				{
+					int x = loopIndex % width;
+					int z = loopIndex / width;
 
-		// TODO: set uv
-		vertices[index++] = x / (float)width;
-		vertices[index++] = z / (float)height;
+					vertices[vertexIndex++] = x * xzScale;
+
+					float perlinValue = get_octaved_noise(x, z, 12, size);
+
+					vertices[vertexIndex++] = perlinValue * 500.0f;
+					vertices[vertexIndex++] = z * xzScale;
+
+					//Normals Need to be calculated.
+					vertices[vertexIndex++] = 0;
+					vertices[vertexIndex++] = 1;
+					vertices[vertexIndex++] = 0;
+
+					//Uvs
+					vertices[vertexIndex++] = x / (float)width;
+					vertices[vertexIndex++] = z / (float)height;
+				}
+			});
 	}
 
-	// OPTIONAL TODO: Calculate normal
-	// TODO: Set normal
+	//Process Remainder
+	int remaining = count % threadCount;
 
-	index = 0;
-	for (int i = 0; i < (width - 1) * (height - 1); i++)
+	if (remaining > 0)
+	{
+		int start = count - remaining;
+		int vertexIndex = start * 8;
+
+		for (int i = start; i < start + remaining; ++i)
+		{
+			int x = i % width;
+			int z = i / width;
+
+			vertices[vertexIndex++] = x * xzScale;
+
+			float frequency = 1.0f;
+			float amplitude = 1.0f;
+
+			float perlinValue = get_octaved_noise(x, z, 12, gridSize);
+
+			vertices[vertexIndex++] = perlinValue * 500.0f;
+			vertices[vertexIndex++] = z * xzScale;
+
+			glm::vec3 cross = glm::cross(glm::vec3(1), glm::vec3(1));
+
+			//Normals
+			vertices[vertexIndex++] = 0.0f;
+			vertices[vertexIndex++] = 0.0f;
+			vertices[vertexIndex++] = 0.0f;
+
+			//Uvs
+			vertices[vertexIndex++] = x / (float)width;
+			vertices[vertexIndex++] = z / (float)height;
+		}
+	}
+
+	for (auto& thread : threads)
+	{
+		thread.join();
+	}
+	threads.clear();
+
+	int increment = stride * 3;
+	for (unsigned int i{ 0 }; i < count * 8; i += increment)
+	{
+		std::vector<glm::vec3> verts(3);
+
+		for (int vertex{ 0 }; vertex < 3; ++vertex)
+		{
+			auto index = i + (stride * vertex);
+
+			auto x = vertices[index];
+			auto y = vertices[index + 1];
+			auto z = vertices[index + 2];
+
+			verts[vertex] = glm::vec3(x, y, z);
+		}
+
+		auto normal = create_normal(verts[0], verts[1], verts[2]);
+
+		for (int vertex{ 0 }; vertex < 3; ++vertex)
+		{
+			auto index = (i + 3) + (stride * vertex);
+
+			vertices[index] = normal.x;
+			vertices[index + 1] = normal.y;
+			vertices[index + 2] = normal.z;
+		}
+	}
+
+	unsigned int index = 0;
+	for (int i{ 0 }; i < (width - 1) * (height - 1); ++i)
 	{
 		int x = i % (width - 1);
 		int z = i / (width - 1);
@@ -515,8 +646,8 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 		indices[index++] = vertex + 1;
 	}
 
-	unsigned int vertSize = (width * height) * stride * sizeof(float);
 	indexCount = ((width - 1) * (height - 1) * 6);
+	unsigned long vertSize = (static_cast<unsigned long long>(width) * height) * stride * sizeof(float);
 
 	unsigned int VAO, VBO, EBO;
 	glGenVertexArrays(1, &VAO);
@@ -542,7 +673,6 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glBindVertexArray(0);
 
 	delete[] vertices;
@@ -551,4 +681,65 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 	stbi_image_free(data);
 
 	return VAO;
+}
+
+float perlin_noise(const float x, const float z)
+{
+	int xGrid = (int)x;
+	int yGrid = (int)z;
+	int xGridB = xGrid + 1;
+	int yGridB = yGrid + 1;
+
+	float sx = x - (float)xGrid;
+	float sy = z - (float)yGrid;
+
+	float n0 = dot_grid_gradient(xGrid, yGrid, x, z);
+	float n1 = dot_grid_gradient(xGridB, yGrid, x, z);
+	float ix0 = interpolate(n0, n1, sx);
+
+	n0 = dot_grid_gradient(xGrid, yGridB, x, z);
+	n1 = dot_grid_gradient(xGridB, yGridB, x, z);
+	float ix1 = interpolate(n0, n1, sx);
+
+	float value = interpolate(ix0, ix1, sy);
+
+	return value;
+}
+
+Vector2 static get_random_gradient(const int ix, const int iy)
+{
+	// No precomputed gradients mean this works for any number of grid coordinates
+	const unsigned int w = 8 * sizeof(unsigned);
+	const unsigned int s = w / 2;
+	unsigned int a = ix, b = iy;
+	a *= 3284157443;
+
+	b ^= a << s | a >> w - s;
+	b *= 1911520717;
+
+	a ^= b << s | b >> w - s;
+	a *= 2048419325;
+	float random = a * (3.14159265 / ~(~0u >> 1)); // in [0, 2*Pi]
+
+	// Create the vector from the angle
+	Vector2 v{};
+	v.x = sin(random);
+	v.y = cos(random);
+
+	return v;
+}
+
+float static dot_grid_gradient(const int ix, const int iy, const float x, const float y)
+{
+	Vector2 gradient = get_random_gradient(ix, iy);
+
+	float dx = x - (float)ix;
+	float dy = y - (float)iy;
+
+	return (dx * gradient.x + dy * gradient.y);
+}
+
+float static interpolate(const float a, const float b, const float value)
+{
+	return (b - a) * (3.0 - value * 2.0) * value * value + a;
 }

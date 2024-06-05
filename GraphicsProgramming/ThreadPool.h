@@ -9,10 +9,12 @@ class ThreadPool
 {
 public:
 
-	ThreadPool(unsigned int numThreads) : stop(false), threads(numThreads)
+	ThreadPool(size_t numThreads) : stop(false), threads(numThreads)
 	{
 		if (numThreads < 1)
-			return;
+			throw std::invalid_argument("Number of threads must be at least 1");
+
+		threads.reserve(numThreads);
 
 		for (unsigned int i = 0; i < numThreads; ++i)
 		{
@@ -21,11 +23,12 @@ public:
 					while (true)
 					{
 						std::function<void()> task;
+
 						{
 							std::unique_lock<std::mutex> lock(queue_mutex);
-							condition.wait(lock, [this] { return stop || !tasks.empty(); });
+							condition.wait(lock, [this] { return stop.load() || !tasks.empty(); });
 
-							if (stop && tasks.empty())
+							if (stop.load() && tasks.empty())
 								return;
 
 							task = std::move(tasks.front());
@@ -40,11 +43,9 @@ public:
 	template<typename F>
 	void enqueue(F&& task);
 
-	~ThreadPool() {
-		{
-			std::unique_lock<std::mutex> lock(queue_mutex);
-			stop.store(true, std::memory_order_relaxed);
-		}
+	~ThreadPool()
+	{
+		stop.store(true);
 		condition.notify_all();
 
 		for (std::thread& thread : threads)
@@ -68,6 +69,6 @@ inline void ThreadPool::enqueue(F&& task)
 	{
 		std::unique_lock<std::mutex> lock(queue_mutex);
 		tasks.emplace(std::forward<F>(task));
-		condition.notify_one();
 	}
+	condition.notify_one();
 }

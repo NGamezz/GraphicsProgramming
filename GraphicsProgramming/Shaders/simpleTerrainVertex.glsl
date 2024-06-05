@@ -14,13 +14,11 @@ uniform mat4 world, view, projection;
 void main()
 {
 	vec3 pos = aPos;
-	//object space offset;
 
 	vec4 worldPos = world * vec4(pos, 1.0);
-	//world pos offset;
-	worldPos.y += texture(mainTex, vUv).r * 100.0f;
 
-	gl_Position = projection * view * world * vec4(aPos, 1.0);
+	gl_Position = projection * view * worldPos;
+	
 	uv = vUv;
 	normal = vNormal;
 
