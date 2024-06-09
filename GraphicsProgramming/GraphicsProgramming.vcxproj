@@ -89,6 +89,13 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\Resources" "C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\x64\Debug\Resources\"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -105,6 +112,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\Resources" "C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\x64\Debug\Resources\"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -113,12 +127,20 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\Resources" "C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\x64\Debug\Resources\"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -129,6 +151,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,7 +159,15 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\ninja\Desktop\Copy Of Graphics Programming\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\Resources" "C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\x64\Debug\Resources\"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FileLoader.cpp" />
@@ -155,25 +186,46 @@
     <ClInclude Include="Event.h" />
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="mesh.h" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="Parallel.h" />
+    <ClInclude Include="perlin_noise.hpp" />
     <ClInclude Include="Print.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\simpleFragmentShader.glsl" />
-    <None Include="Shaders\simpleTerrainFragment.glsl" />
-    <None Include="Shaders\simpleTerrainVertex.glsl" />
-    <None Include="Shaders\simpleVertexShader.glsl" />
-    <None Include="Shaders\skyFragmentShader.glsl" />
-    <None Include="Shaders\skyVertexShader.glsl" />
+    <None Include="packages.config" />
+    <None Include="Resources\Shaders\modelFragment.glsl" />
+    <None Include="Resources\Shaders\modelVertex.glsl" />
+    <None Include="Resources\Shaders\simpleFragmentShader.glsl" />
+    <None Include="Resources\Shaders\simpleTerrainFragment.glsl" />
+    <None Include="Resources\Shaders\simpleTerrainVertex.glsl" />
+    <None Include="Resources\Shaders\simpleVertexShader.glsl" />
+    <None Include="Resources\Shaders\skyFragmentShader.glsl" />
+    <None Include="Resources\Shaders\skyVertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Textures\container2.png" />
-    <Image Include="Textures\container2_normal.png" />
-    <Image Include="Textures\Heightmap2.png" />
+    <Image Include="Resources\Textures\container2.png" />
+    <Image Include="Resources\Textures\container2_normal.png" />
+    <Image Include="Resources\Textures\dirt.jpg" />
+    <Image Include="Resources\Textures\grass.png" />
+    <Image Include="Resources\Textures\Heightmap2.png" />
+    <Image Include="Resources\Textures\HeightmapNormal.png" />
+    <Image Include="Resources\Textures\rock.jpg" />
+    <Image Include="Resources\Textures\sand.jpg" />
+    <Image Include="Resources\Textures\snow.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets" Condition="Exists('packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" />
+    <Import Project="packages\Assimp.3.0.0\build\native\Assimp.targets" Condition="Exists('packages\Assimp.3.0.0\build\native\Assimp.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets'))" />
+    <Error Condition="!Exists('packages\Assimp.3.0.0\build\native\Assimp.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Assimp.3.0.0\build\native\Assimp.targets'))" />
+  </Target>
 </Project>

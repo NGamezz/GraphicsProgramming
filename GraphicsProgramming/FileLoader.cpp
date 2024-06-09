@@ -1,6 +1,6 @@
 #include "FileLoader.h"
 
-unsigned int FileLoader::LoadGLTexture(const char* filePath)
+unsigned int FileLoader::LoadGLTexture(const char* filePath, int comp)
 {
 	unsigned int textureId = 0;
 	glGenTextures(1, &textureId);
@@ -10,10 +10,12 @@ unsigned int FileLoader::LoadGLTexture(const char* filePath)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	int width, height, numChannels;
-	unsigned char* data = stbi_load(filePath, &width, &height, &numChannels, 0);
+	unsigned char* data = stbi_load(filePath, &width, &height, &numChannels, comp);
 
 	if (data != NULL)
 	{
+		if (comp != 0) numChannels = comp;
+
 		switch (numChannels)
 		{
 		case (3):

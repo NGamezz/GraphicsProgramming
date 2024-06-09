@@ -13,6 +13,9 @@
 #include "Parallel.h"
 #include "ThreadPool.h"
 
+#include "model.h"
+
+#include "perlin_noise.hpp"
 #include "Print.h"
 
 #include "FileLoader.h"
@@ -20,12 +23,12 @@
 
 #include <glm/gtc/quaternion.hpp>
 
-struct GeometryInformation
+struct Entity
 {
+	Model* model;
 	glm::vec3 position;
-	float vertices[1];
-	float stride;
-	int indices[];
+	glm::vec3 rotation;
+	glm::vec3 scale;
 };
 
 struct WorldInformation
@@ -34,92 +37,95 @@ struct WorldInformation
 	glm::mat4 projection = glm::mat4();
 	glm::mat4 view = glm::mat4();
 	glm::vec3 lightPosition = glm::vec3();
-	std::vector<GeometryInformation> objectsToRender;
 };
 
-struct Vertex
-{
-	unsigned int startIndex;
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec2 uv;
-};
+void render_model(Model* model, glm::vec3 pos, glm::vec3 rotation, glm::vec3 scale);
 
-typedef struct
-{
-	float x, y;
-} Vector2;
+void render_cube(unsigned int& cubeProgram);
 
-int init(GLFWwindow*& window);
-void CreateGeometry(GLuint& vao, GLuint& EBO, int& boxSize, int& boxIndexSize);
-void ProcessInput(GLFWwindow*& window);
+int initialize_window(GLFWwindow*& window);
+void create_cube(GLuint& vao, GLuint& EBO, int& skyBoxSize, int& skyBoxIndexSize);
+void process_input(GLFWwindow*& window);
 
-float static interpolate(const float a, const float b, const float value);
-Vector2 static get_random_gradient(const int ix, const int iy);
-float static dot_grid_gradient(const int ix, const int iy, const float x, const float y);
-float perlin_noise(const float x, const float z);
+void process_uniforms(unsigned int& program, WorldInformation& worldInformation, glm::mat4& worldMatrix);
+void initialize_world_information(WorldInformation& worldInformation);
 
-void ProcessUniforms(unsigned int& program, WorldInformation& worldInformation, glm::mat4& worldMatrix);
-void SetupInitialWorldInformation(WorldInformation& worldInformation);
+void render_plane(unsigned int& planeProgram);
+unsigned int generate_landscape_chunk(const int size, float hScale, float xzScale, unsigned int& indexCount, int concurrencyLevel = -1);
 
-float perlin_noise(float x, float z);
+void render_skybox(unsigned int& skyProgram);
 
-void RenderPlane(unsigned int& planeProgram);
-unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& indexCount, unsigned int& heightmapID);
+void create_shaders(Renderer& renderer);
 
-void RenderSkyBox(unsigned int& skyProgram);
+void mouse_call_back(GLFWwindow* window, double xPos, double yPos);
 
-void MousePosCallBack(GLFWwindow* window, double xPos, double yPos);
+void key_call_back(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-void KeyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
+void load_textures();
+
+void load_models(std::vector<Entity>& entities);
 
 bool keys[1024];
 
 const int width = 1280, height = 720;
 
+//Used for deferring actions to the main thread loop.
 ActionQueue actionQueue;
 
 WorldInformation worldInformation;
 
-GLuint boxVao, boxEbo;
-int boxSize, boxIndexSize;
+GLuint skyBoxVao, skyBoxEbo;
+int skyBoxSize, skyBoxIndexSize;
 
 float cameraYaw, cameraPitch;
 float lastX, lastY;
 bool firstMouse = true;
 
-GLuint simpleProgram, skyBoxProgram, terrainProgram;
+glm::vec3 topColor = glm::vec3(68.0 / 255.0, 118.0 / 255.0, 189.0 / 255.0);
+glm::vec3 botColor = glm::vec3(188.0 / 255.0, 214.0 / 255.0, 231.0 / 255.0);
+
+glm::vec3 sunColor = glm::vec3(1.0, 200.0 / 255.0, 50.0 / 255.0);
+
+GLuint skyBoxProgram, cubeProgram, terrainProgram, modelProgram;
 
 glm::quat camQuaternion = glm::quat(glm::vec3(glm::radians(cameraPitch), glm::radians(cameraYaw), 0.0f));
 
+GLuint cubeVao, cubeEbo; 
+int cubeSize, cubeIndexSize;
+
 //terrain data
-GLuint terrainVAO, heightMapId, terrainIndexCount;
-GLuint heightMapNormalID;
+GLuint terrainVAO, terrainIndexCount;
+
+GLuint cubeDiffuse, cubeNormal;
+
+GLuint grass, rock, snow, sand, dirt;
+
+std::vector<Entity> entities;
 
 int main()
 {
 	GLFWwindow* window = nullptr;
-	auto result = init(window);
+	auto result = initialize_window(window);
 
-	if (result != 0)
-		return result;
+	if (result != 0) return result;
 
 	int concurrency = std::thread::hardware_concurrency();
 	ThreadPool threadPool(concurrency);
 
-	CreateGeometry(boxVao, boxEbo, boxSize, boxIndexSize);
+	create_cube(skyBoxVao, skyBoxEbo, skyBoxSize, skyBoxIndexSize);
 
-	std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>();
+	create_cube(cubeVao, cubeEbo, cubeSize, cubeIndexSize);
 
-	renderer->Intialize(simpleProgram);
-	renderer->createProgram(skyBoxProgram, "Shaders/skyVertexShader.glsl", "Shaders/skyFragmentShader.glsl");
-	renderer->createProgram(terrainProgram, "Shaders/simpleTerrainVertex.glsl", "Shaders/simpleTerrainFragment.glsl");
+	Renderer renderer;
+	create_shaders(renderer);
 
-	terrainVAO = GeneratePlane("Textures/Heightmap2.png", GL_RGBA, 4, 100.0f, 5.0f, terrainIndexCount, heightMapId);
-	heightMapNormalID = FileLoader::LoadGLTexture("Textures/HeightmapNormal.png");
-	//GameManager gameManager;
+	terrainVAO = generate_landscape_chunk(1000.0f, 100.0f, 5.0f, terrainIndexCount);
 
-	SetupInitialWorldInformation(worldInformation);
+	load_models(entities);
+
+	load_textures();
+
+	initialize_world_information(worldInformation);
 
 	//Create viewport
 	glViewport(0, 0, width, height);
@@ -127,7 +133,6 @@ int main()
 	double deltaTime = 0.0;
 	double prevousTick = 0.0;
 	double frameRate = 0.0;
-	//Game render loop
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -142,12 +147,23 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//input
-		ProcessInput(window);
+		process_input(window);
 
 		////rendering
-		RenderSkyBox(skyBoxProgram);
-		RenderPlane(terrainProgram);
-		renderer->RenderLoop(window);
+		render_skybox(skyBoxProgram);
+		render_plane(terrainProgram);
+		render_cube(cubeProgram);
+
+		//Update Sun Color.
+		sunColor = glm::vec3(glm::sin(time), sin(time * 0.5f), glm::cos(time));
+		worldInformation.lightPosition = glm::vec3(glm::cos(time * 0.3f), glm::sin(time * 0.3f), 0.0f);
+
+		renderer.RenderLoop(window);
+
+		for (auto& entity : entities)
+		{
+			render_model(entity.model, entity.position, entity.rotation, entity.scale);
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -157,13 +173,84 @@ int main()
 			actionQueue.ClearFunctionQueue();
 	}
 
+	//Dispose of entity pointers.
+	for (auto& entity : entities)
+	{
+		delete entity.model;
+	}
+
 	//Terminate
 	threadPool.~ThreadPool();
 	glfwTerminate();
 	return 0;
 }
 
-void KeyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods)
+void load_models(std::vector<Entity>& entities)
+{
+	Entity templeEntity{};
+
+	templeEntity.model = new Model("Resources/Models/Japanese_Temple_Model/Japanese_Temple.obj");
+	templeEntity.position = glm::vec3(500, 0, 500);
+	templeEntity.rotation = glm::vec3(0, 0.1f, 0.0f);
+	templeEntity.scale = glm::vec3(25);
+
+	//Temple doesn't need the uvs to be flipped. Backpack Does.
+	stbi_set_flip_vertically_on_load(true);
+
+	Entity backPack{};
+
+	backPack.model = new Model("Resources/Models/backpack/backpack.obj");
+	backPack.position = glm::vec3(750, 150, 750);
+	backPack.rotation = glm::vec3(0);
+	backPack.scale = glm::vec3(50);
+
+	std::cout << "Finished Loading Models" << std::endl;
+
+	entities.push_back(backPack);
+	entities.push_back(templeEntity);
+}
+
+void render_model(Model* model, glm::vec3 pos, glm::vec3 rotation, glm::vec3 scale)
+{
+	//glEnable(GL_BLEND);
+	//Alpha Blend.
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//Additive
+	//glBlendFunc(GL_ONE, GL_ONE);
+	//Sort Additive
+	//glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
+	//Multiply
+	//glBlendFunc(GL_DST_COLOR, GL_ZERO);
+	//Double Multiply
+	//glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH);
+	glEnable(GL_DEPTH_TEST);
+	glCullFace(GL_BACK);
+
+	glUseProgram(modelProgram);
+
+	glm::mat4 world = glm::mat4(1.0f);
+	world = glm::translate(world, pos);
+	world = world * glm::mat4_cast(glm::quat(rotation));
+	world = glm::scale(world, scale);
+
+	process_uniforms(modelProgram, worldInformation, world);
+	model->Draw(modelProgram);
+
+	glDisable(GL_BLEND);
+}
+
+void create_shaders(Renderer& renderer)
+{
+	renderer.Intialize(cubeProgram);
+	renderer.createProgram(skyBoxProgram, "Resources/Shaders/skyVertexShader.glsl", "Resources/Shaders/skyFragmentShader.glsl");
+	renderer.createProgram(terrainProgram, "Resources/Shaders/simpleTerrainVertex.glsl", "Resources/Shaders/simpleTerrainFragment.glsl");
+	renderer.createProgram(modelProgram, "Resources/Shaders/modelVertex.glsl", "Resources/Shaders/modelFragment.glsl");
+}
+
+void key_call_back(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if (action == GLFW_PRESS)
 	{
@@ -175,7 +262,38 @@ void KeyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 }
 
-void RenderPlane(unsigned int& planeProgram)
+void load_textures()
+{
+	//Textures for the terrain.
+	dirt = FileLoader::LoadGLTexture("Resources/Textures/dirt.jpg");
+	sand = FileLoader::LoadGLTexture("Resources/Textures/sand.jpg");
+	grass = FileLoader::LoadGLTexture("Resources/Textures/grass.png", 4);
+	rock = FileLoader::LoadGLTexture("Resources/Textures/rock.jpg");
+	snow = FileLoader::LoadGLTexture("Resources/Textures/snow.jpg");
+
+	glUseProgram(terrainProgram);
+
+	glUniform1i(glGetUniformLocation(terrainProgram, "dirt"), 0);
+	glUniform1i(glGetUniformLocation(terrainProgram, "sand"), 1);
+	glUniform1i(glGetUniformLocation(terrainProgram, "grass"), 2);
+	glUniform1i(glGetUniformLocation(terrainProgram, "rock"), 3);
+	glUniform1i(glGetUniformLocation(terrainProgram, "snow"), 4);
+
+	//Texture setup for the models.
+	glUseProgram(modelProgram);
+
+	glUniform1i(glGetUniformLocation(modelProgram, "texture_diffuse1"), 0);
+	glUniform1i(glGetUniformLocation(modelProgram, "texture_specular1"), 1);
+	glUniform1i(glGetUniformLocation(modelProgram, "texture_normal1"), 2);
+	glUniform1i(glGetUniformLocation(modelProgram, "texture_roughness1"), 3);
+	glUniform1i(glGetUniformLocation(modelProgram, "texture_ao1"), 4);
+
+	//Textures for the Box.
+	cubeDiffuse = FileLoader::LoadGLTexture("Resources/Textures/container2.png");
+	cubeNormal = FileLoader::LoadGLTexture("Resources/Textures/container2_normal.png");
+}
+
+void render_plane(unsigned int& planeProgram)
 {
 	glEnable(GL_DEPTH);
 	glEnable(GL_DEPTH_TEST);
@@ -186,19 +304,27 @@ void RenderPlane(unsigned int& planeProgram)
 
 	glm::mat4 world = glm::mat4(1.0f);
 
-	ProcessUniforms(planeProgram, worldInformation, world);
+	process_uniforms(planeProgram, worldInformation, world);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, heightMapId);
+	glBindTexture(GL_TEXTURE_2D, dirt);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, heightMapNormalID);
+	glBindTexture(GL_TEXTURE_2D, sand);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, grass);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, rock);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, snow);
 
 	glBindVertexArray(terrainVAO);
 	glDrawElements(GL_TRIANGLES, terrainIndexCount, GL_UNSIGNED_INT, 0);
 	glUseProgram(0);
 }
 
-void SetupInitialWorldInformation(WorldInformation& worldInformation)
+void initialize_world_information(WorldInformation& worldInformation)
 {
 	worldInformation = WorldInformation();
 	worldInformation.lightPosition = glm::normalize(glm::vec3(-0.5, -0.5f, -0.5f));
@@ -209,7 +335,7 @@ void SetupInitialWorldInformation(WorldInformation& worldInformation)
 	worldInformation.view = glm::lookAt(worldInformation.cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
-void MousePosCallBack(GLFWwindow* window, double xPos, double yPos)
+void mouse_call_back(GLFWwindow* window, double xPos, double yPos)
 {
 	//Op basis van pitch en yaw roteren we een genormalizeerde vector3.
 	float x = (float)xPos;
@@ -250,7 +376,35 @@ void MousePosCallBack(GLFWwindow* window, double xPos, double yPos)
 	worldInformation.view = glm::lookAt(worldInformation.cameraPosition, worldInformation.cameraPosition + camForward, camUp);
 }
 
-void RenderSkyBox(unsigned int& skyProgram)
+void render_cube(unsigned int& cubeProgram)
+{
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH);
+	glEnable(GL_DEPTH_TEST);
+	glCullFace(GL_BACK);
+
+	glUseProgram(cubeProgram);
+
+	glm::mat4 world = glm::mat4(1.0f);
+	world = glm::translate(world, glm::vec3(0, 100, 0));
+	world = world * glm::mat4_cast(glm::quat(glm::vec3(0, 0.5f, 0)));
+	world = glm::scale(world, glm::vec3(50));
+
+	process_uniforms(cubeProgram, worldInformation, world);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, cubeDiffuse);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, cubeNormal);
+
+	glBindVertexArray(cubeVao);
+	glDrawElements(GL_TRIANGLES, cubeIndexSize, GL_UNSIGNED_INT, 0);
+
+	glUseProgram(0);
+}
+
+void render_skybox(unsigned int& skyProgram)
 {
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH);
@@ -262,10 +416,10 @@ void RenderSkyBox(unsigned int& skyProgram)
 	world = glm::translate(world, worldInformation.cameraPosition);
 	world = glm::scale(world, glm::vec3(100.0f, 100.0f, 100.0f));
 
-	ProcessUniforms(skyProgram, worldInformation, world);
+	process_uniforms(skyProgram, worldInformation, world);
 
-	glBindVertexArray(boxVao);
-	glDrawElements(GL_TRIANGLES, boxIndexSize, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(skyBoxVao);
+	glDrawElements(GL_TRIANGLES, skyBoxIndexSize, GL_UNSIGNED_INT, 0);
 
 	glEnable(GL_DEPTH);
 	glEnable(GL_DEPTH_TEST);
@@ -274,18 +428,23 @@ void RenderSkyBox(unsigned int& skyProgram)
 	glUseProgram(0);
 }
 
-void ProcessUniforms(unsigned int& program, WorldInformation& worldInformation, glm::mat4& worldMatrix)
+void process_uniforms(unsigned int& program, WorldInformation& worldInformation, glm::mat4& worldMatrix)
 {
 	glUniformMatrix4fv(glGetUniformLocation(program, "world"), 1, GL_FALSE, glm::value_ptr(worldMatrix));
 	//V = value pointer, sturen referentie naar instance door.
 	glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, glm::value_ptr(worldInformation.projection));
 	glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(worldInformation.view));
 
+	glUniform3fv(glGetUniformLocation(program, "sunColor"), 1, glm::value_ptr(sunColor));
+
+	glUniform3fv(glGetUniformLocation(program, "topColor"), 1, glm::value_ptr(topColor));
+	glUniform3fv(glGetUniformLocation(program, "botColor"), 1, glm::value_ptr(botColor));
+
 	glUniform3fv(glGetUniformLocation(program, "lightDirection"), 1, glm::value_ptr(worldInformation.lightPosition));
 	glUniform3fv(glGetUniformLocation(program, "cameraPosition"), 1, glm::value_ptr(worldInformation.cameraPosition));
 }
 
-void ProcessInput(GLFWwindow*& window)
+void process_input(GLFWwindow*& window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE))
 	{
@@ -322,7 +481,7 @@ void ProcessInput(GLFWwindow*& window)
 	}
 }
 
-int init(GLFWwindow*& window)
+int initialize_window(GLFWwindow*& window)
 {
 	if (!glfwInit())
 	{
@@ -348,8 +507,8 @@ int init(GLFWwindow*& window)
 	}
 
 	//Register CallBacks
-	glfwSetCursorPosCallback(window, MousePosCallBack);
-	glfwSetKeyCallback(window, KeyCallBack);
+	glfwSetCursorPosCallback(window, mouse_call_back);
+	glfwSetKeyCallback(window, key_call_back);
 
 	//Set Context
 	glfwMakeContextCurrent(window);
@@ -365,7 +524,7 @@ int init(GLFWwindow*& window)
 	return 0;
 }
 
-void CreateGeometry(GLuint& VAO, GLuint& EBO, int& size, int& numIndices)
+void create_cube(GLuint& VAO, GLuint& EBO, int& size, int& numIndices)
 {
 	// need 24 vertices for normal/uv-mapped Cube
 	float vertices[] = {
@@ -427,7 +586,7 @@ void CreateGeometry(GLuint& VAO, GLuint& EBO, int& size, int& numIndices)
 		22, 13, 23,    // second triangle
 	};
 
-	int stride = (3 + 3 + 2 + 3 + 3 + 3) * sizeof(float);
+	int stride = (17) * sizeof(float);
 
 	size = sizeof(vertices) / stride;
 	numIndices = sizeof(indices) / sizeof(int);
@@ -465,66 +624,72 @@ void CreateGeometry(GLuint& VAO, GLuint& EBO, int& size, int& numIndices)
 	glEnableVertexAttribArray(5);
 }
 
-static glm::vec3 create_normal(const glm::vec3 a, const glm::vec3 b, const glm::vec3 c)
-{
-	auto cross = glm::cross(b - a, c - a);
-	return glm::normalize(cross);
+static inline glm::vec3 get_vertex(const float* vertices, const int width, const int x, const int z, const int stride) {
+	int index = (z * width + x) * stride;
+	return glm::vec3(vertices[index], vertices[index + 1], vertices[index + 2]);
 }
 
-static float get_octaved_noise(const float x, const float y, const int octaves, const int size)
+//This function has been made with the help of chat gpt and adjusted later.
+static void calculate_normals(float* vertices, const int stride, const int height, const int width)
 {
-	float perlinValue = 0.0f;
-	float frequency = 1.0f;
-	float amplitude = 1.0f;
-
-	for (int octave = 0; octave < 12; ++octave)
+	for (unsigned int i = 0; i < (height - 1) * (width - 1); ++i)
 	{
-		perlinValue += perlin_noise(x * frequency / size, y * frequency / size) * amplitude;
+		int x = i % width;
+		int z = i / width;
 
-		amplitude *= 0.5f;
-		frequency *= 2;
-	}
+		glm::vec3 sum(0.0f);
 
-	return perlinValue;
-}
+		glm::vec3 center = get_vertex(vertices, width, x, z, stride);
 
-unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& indexCount, unsigned int& heightmapID)
-{
-	int width = 0, height = 0, channels = 0;
-	unsigned char* data = nullptr;
-	if (heightmap != nullptr)
-	{
-		data = stbi_load(heightmap, &width, &height, &channels, comp);
-		if (data)
-		{
-			glGenTextures(1, &heightmapID);
-			glBindTexture(GL_TEXTURE_2D, heightmapID);
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-			glGenerateMipmap(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, 0);
+		if (x > 0 && z > 0) {
+			glm::vec3 left = get_vertex(vertices, width, x - 1, z, stride);
+			glm::vec3 down = get_vertex(vertices, width, x, z - 1, stride);
+			sum += glm::normalize(glm::cross(down - center, left - center));
 		}
-	}
+		if (x < width - 1 && z > 0) {
+			glm::vec3 right = get_vertex(vertices, width, x + 1, z, stride);
+			glm::vec3 down = get_vertex(vertices, width, x, z - 1, stride);
+			sum += glm::normalize(glm::cross(right - center, down - center));
+		}
+		if (x > 0 && z < height - 1) {
+			glm::vec3 left = get_vertex(vertices, width, x - 1, z, stride);
+			glm::vec3 up = get_vertex(vertices, width, x, z + 1, stride);
+			sum += glm::normalize(glm::cross(left - center, up - center));
+		}
+		if (x < width - 1 && z < height - 1) {
+			glm::vec3 right = get_vertex(vertices, width, x + 1, z, stride);
+			glm::vec3 up = get_vertex(vertices, width, x, z + 1, stride);
+			sum += glm::normalize(glm::cross(up - center, right - center));
+		}
 
+		glm::vec3 normal = glm::normalize(sum);
+
+		int vertexIndex = (i)*stride + 3;
+		vertices[vertexIndex] = normal.x;
+		vertices[vertexIndex + 1] = normal.y;
+		vertices[vertexIndex + 2] = normal.z;
+	}
+}
+
+unsigned int generate_landscape_chunk(const int size, float hScale, float xzScale, unsigned int& indexCount, int concurrencyLevel)
+{
 	const int stride = 8;
-	int count = width * height;
+	int count = size * size;
 
 	const int gridSize = 400;
 
-	float* vertices = new float[count * stride];
-	unsigned int* indices = new unsigned int[(width - 1) * (height - 1) * 6];
+	const int octaves = 5;
 
-	//Calculate Batch Size
-	int threadCount = std::thread::hardware_concurrency();
+	float* vertices = new float[count * stride];
+	unsigned int* indices = new unsigned int[(size - 1) * (size - 1) * 6];
+
+	//Calculate Batch Size based on concurrency level.
+	int hardWareConcurrency = std::thread::hardware_concurrency();
+	int threadCount = concurrencyLevel == -1 || concurrencyLevel > hardWareConcurrency - 1 ? hardWareConcurrency - 1 : concurrencyLevel;
 	int batchSize = count / threadCount;
 	int batches = count / batchSize;
 
 	std::vector<std::thread> threads;
-
-	std::vector<Vertex> vertexVector(count);
 
 	//Process Primary Batches.
 	for (int i = 0; i < batches; i++)
@@ -534,28 +699,25 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 		threads.emplace_back([=, &vertices]()
 			{
 				int vertexIndex = start * 8;
-				int size = gridSize;
 
 				for (int loopIndex = start; loopIndex < start + batchSize; ++loopIndex)
 				{
-					int x = loopIndex % width;
-					int z = loopIndex / width;
+					int x = loopIndex % size;
+					int z = loopIndex / size;
 
 					vertices[vertexIndex++] = x * xzScale;
 
-					float perlinValue = get_octaved_noise(x, z, 12, size);
+					float perlinValue = perlin_noise::octaved_perlin_noise(x, z, octaves, gridSize);
 
 					vertices[vertexIndex++] = perlinValue * 500.0f;
 					vertices[vertexIndex++] = z * xzScale;
 
-					//Normals Need to be calculated.
-					vertices[vertexIndex++] = 0;
-					vertices[vertexIndex++] = 1;
-					vertices[vertexIndex++] = 0;
+					vertices[vertexIndex++] = 0.0f;
+					vertices[vertexIndex++] = 0.0f;
+					vertices[vertexIndex++] = 0.0f;
 
-					//Uvs
-					vertices[vertexIndex++] = x / (float)width;
-					vertices[vertexIndex++] = z / (float)height;
+					vertices[vertexIndex++] = x / (float)size;
+					vertices[vertexIndex++] = z / (float)size;
 				}
 			});
 	}
@@ -570,29 +732,29 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 
 		for (int i = start; i < start + remaining; ++i)
 		{
-			int x = i % width;
-			int z = i / width;
+			int x = i % size;
+			int z = i / size;
 
 			vertices[vertexIndex++] = x * xzScale;
 
 			float frequency = 1.0f;
 			float amplitude = 1.0f;
 
-			float perlinValue = get_octaved_noise(x, z, 12, gridSize);
+			float perlinValue = perlin_noise::octaved_perlin_noise(x, z, octaves, gridSize);
 
 			vertices[vertexIndex++] = perlinValue * 500.0f;
 			vertices[vertexIndex++] = z * xzScale;
 
 			glm::vec3 cross = glm::cross(glm::vec3(1), glm::vec3(1));
 
-			//Normals
+			//
 			vertices[vertexIndex++] = 0.0f;
 			vertices[vertexIndex++] = 0.0f;
 			vertices[vertexIndex++] = 0.0f;
 
 			//Uvs
-			vertices[vertexIndex++] = x / (float)width;
-			vertices[vertexIndex++] = z / (float)height;
+			vertices[vertexIndex++] = x / (float)size;
+			vertices[vertexIndex++] = z / (float)size;
 		}
 	}
 
@@ -602,52 +764,27 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 	}
 	threads.clear();
 
-	int increment = stride * 3;
-	for (unsigned int i{ 0 }; i < count * 8; i += increment)
-	{
-		std::vector<glm::vec3> verts(3);
-
-		for (int vertex{ 0 }; vertex < 3; ++vertex)
-		{
-			auto index = i + (stride * vertex);
-
-			auto x = vertices[index];
-			auto y = vertices[index + 1];
-			auto z = vertices[index + 2];
-
-			verts[vertex] = glm::vec3(x, y, z);
-		}
-
-		auto normal = create_normal(verts[0], verts[1], verts[2]);
-
-		for (int vertex{ 0 }; vertex < 3; ++vertex)
-		{
-			auto index = (i + 3) + (stride * vertex);
-
-			vertices[index] = normal.x;
-			vertices[index + 1] = normal.y;
-			vertices[index + 2] = normal.z;
-		}
-	}
-
 	unsigned int index = 0;
-	for (int i{ 0 }; i < (width - 1) * (height - 1); ++i)
+	for (unsigned int i = 0; i < (size - 1) * (size - 1); ++i)
 	{
-		int x = i % (width - 1);
-		int z = i / (width - 1);
+		int x = i % (size - 1);
+		int z = i / (size - 1);
 
-		int vertex = z * width + x;
+		int vertex = z * size + x;
 
 		indices[index++] = vertex;
-		indices[index++] = vertex + width;
-		indices[index++] = vertex + width + 1;
+		indices[index++] = vertex + size;
+		indices[index++] = vertex + size + 1;
 		indices[index++] = vertex;
-		indices[index++] = vertex + width + 1;
+		indices[index++] = vertex + size + 1;
 		indices[index++] = vertex + 1;
 	}
 
-	indexCount = ((width - 1) * (height - 1) * 6);
-	unsigned long vertSize = (static_cast<unsigned long long>(width) * height) * stride * sizeof(float);
+	indexCount = ((size - 1) * (size - 1) * 6);
+
+	calculate_normals(vertices, stride, size, size);
+
+	unsigned long vertSize = (static_cast<unsigned long long>(size) * size) * stride * sizeof(float);
 
 	unsigned int VAO, VBO, EBO;
 	glGenVertexArrays(1, &VAO);
@@ -678,68 +815,5 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 	delete[] vertices;
 	delete[] indices;
 
-	stbi_image_free(data);
-
 	return VAO;
-}
-
-float perlin_noise(const float x, const float z)
-{
-	int xGrid = (int)x;
-	int yGrid = (int)z;
-	int xGridB = xGrid + 1;
-	int yGridB = yGrid + 1;
-
-	float sx = x - (float)xGrid;
-	float sy = z - (float)yGrid;
-
-	float n0 = dot_grid_gradient(xGrid, yGrid, x, z);
-	float n1 = dot_grid_gradient(xGridB, yGrid, x, z);
-	float ix0 = interpolate(n0, n1, sx);
-
-	n0 = dot_grid_gradient(xGrid, yGridB, x, z);
-	n1 = dot_grid_gradient(xGridB, yGridB, x, z);
-	float ix1 = interpolate(n0, n1, sx);
-
-	float value = interpolate(ix0, ix1, sy);
-
-	return value;
-}
-
-Vector2 static get_random_gradient(const int ix, const int iy)
-{
-	// No precomputed gradients mean this works for any number of grid coordinates
-	const unsigned int w = 8 * sizeof(unsigned);
-	const unsigned int s = w / 2;
-	unsigned int a = ix, b = iy;
-	a *= 3284157443;
-
-	b ^= a << s | a >> w - s;
-	b *= 1911520717;
-
-	a ^= b << s | b >> w - s;
-	a *= 2048419325;
-	float random = a * (3.14159265 / ~(~0u >> 1)); // in [0, 2*Pi]
-
-	// Create the vector from the angle
-	Vector2 v{};
-	v.x = sin(random);
-	v.y = cos(random);
-
-	return v;
-}
-
-float static dot_grid_gradient(const int ix, const int iy, const float x, const float y)
-{
-	Vector2 gradient = get_random_gradient(ix, iy);
-
-	float dx = x - (float)ix;
-	float dy = y - (float)iy;
-
-	return (dx * gradient.x + dy * gradient.y);
-}
-
-float static interpolate(const float a, const float b, const float value)
-{
-	return (b - a) * (3.0 - value * 2.0) * value * value + a;
 }

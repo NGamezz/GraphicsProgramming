@@ -7,7 +7,7 @@ void Renderer::RenderLoop(GLFWwindow*& window)
 
 void Renderer::Intialize(GLuint& program)
 {
-	createProgram(program, "Shaders/simpleVertexShader.glsl", "Shaders/simpleFragmentShader.glsl");
+	createProgram(program, "Resources/Shaders/simpleVertexShader.glsl", "Resources/Shaders/simpleFragmentShader.glsl");
 
 	glUseProgram(program);
 	glUniform1i(glGetUniformLocation(program, "mainTex"), 0);
@@ -23,13 +23,18 @@ void Renderer::createProgram(GLuint& programId, const char* vertex, const char* 
 
 	char infoLog[512];
 	int succes;
-	
+
 	char* vertexSrc = vertexFuture.get();
+
+	if (vertexSrc == nullptr)
+	{
+		std::cout << "Failed to Load Vertex" << std::endl;
+	}
 
 	vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShaderId, 1, &vertexSrc, nullptr);
 	glCompileShader(vertexShaderId);
-	
+
 	glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &succes);
 	if (!succes)
 	{
@@ -38,6 +43,11 @@ void Renderer::createProgram(GLuint& programId, const char* vertex, const char* 
 	}
 
 	char* fragmentSrc = fragmentFuture.get();
+
+	if (fragmentSrc == nullptr)
+	{
+		std::cout << "Failed to Load Fragment" << std::endl;
+	}
 
 	fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShaderId, 1, &fragmentSrc, nullptr);

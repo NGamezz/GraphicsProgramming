@@ -77,35 +77,69 @@
     <ClInclude Include="Print.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="perlin_noise.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\simpleVertexShader.glsl">
+    <None Include="packages.config" />
+    <None Include="Resources\Shaders\modelFragment.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="Shaders\simpleFragmentShader.glsl">
+    <None Include="Resources\Shaders\modelVertex.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="Shaders\skyFragmentShader.glsl">
+    <None Include="Resources\Shaders\simpleFragmentShader.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="Shaders\skyVertexShader.glsl">
+    <None Include="Resources\Shaders\simpleTerrainFragment.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="Shaders\simpleTerrainFragment.glsl">
+    <None Include="Resources\Shaders\simpleTerrainVertex.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="Shaders\simpleTerrainVertex.glsl">
+    <None Include="Resources\Shaders\simpleVertexShader.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\skyFragmentShader.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\skyVertexShader.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Textures\container2.png">
+    <Image Include="Resources\Textures\container2.png">
       <Filter>Resource Files\Textures</Filter>
     </Image>
-    <Image Include="Textures\Heightmap2.png">
+    <Image Include="Resources\Textures\container2_normal.png">
       <Filter>Resource Files\Textures</Filter>
     </Image>
-    <Image Include="Textures\container2_normal.png">
+    <Image Include="Resources\Textures\dirt.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\grass.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\Heightmap2.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\HeightmapNormal.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\rock.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\sand.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\snow.jpg">
       <Filter>Resource Files\Textures</Filter>
     </Image>
   </ItemGroup>

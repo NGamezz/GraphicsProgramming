@@ -1,6 +1,0 @@
-﻿  Renderer.cpp
-C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
-  (compiling source file 'Renderer.cpp')
-  
-  GraphicsProgramming.vcxproj -> C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\x64\Debug\GraphicsProgramming.exe
-  0 File(s) copied

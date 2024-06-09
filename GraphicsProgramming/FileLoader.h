@@ -11,7 +11,7 @@
 static class FileLoader
 {
 public:
-	static unsigned int LoadGLTexture(const char* filePath);
+	static unsigned int LoadGLTexture(const char* filePath, int comp = 0);
 	static std::future<char*> LoadFileAsync(const char* filePath);
 private:
 };
