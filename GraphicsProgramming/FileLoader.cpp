@@ -1,6 +1,6 @@
 #include "FileLoader.h"
 
-unsigned int FileLoader::LoadGLTexture(const char* filePath, int comp)
+unsigned int FileLoader::load_GL_texture(const char* filePath, int comp)
 {
 	unsigned int textureId = 0;
 	glGenTextures(1, &textureId);
@@ -41,7 +41,7 @@ unsigned int FileLoader::LoadGLTexture(const char* filePath, int comp)
 	return textureId;
 }
 
-void loadFileAsync(const char* filePath, std::promise<char*> promise)
+void load_file(const char* filePath, std::promise<char*> promise)
 {
 	std::ifstream file(filePath, std::ios::binary);
 	char* output;
@@ -67,12 +67,12 @@ void loadFileAsync(const char* filePath, std::promise<char*> promise)
 	promise.set_value(output);
 }
 
-std::future<char*> FileLoader::LoadFileAsync(const char* filePath)
+std::future<char*> FileLoader::load_file_async(const char* filePath)
 {
 	std::promise<char*> p;
 	auto future = p.get_future();
 
-	std::thread thread = std::thread(loadFileAsync, filePath, std::move(p));
+	std::thread thread = std::thread(load_file, filePath, std::move(p));
 	thread.detach();
 
 	return future;

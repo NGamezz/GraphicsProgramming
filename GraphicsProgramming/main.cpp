@@ -1,27 +1,14 @@
-#include <GLAD/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#pragma once
 
 #define STB_IMAGE_IMPLEMENTATION
 
-#include "GameManager.h"
 #include "Renderer.h"
 
-#include "Parallel.h"
+#include <GLFW/glfw3.h>
+
 #include "ThreadPool.h"
-
-#include "model.h"
-
 #include "perlin_noise.hpp"
-#include "Print.h"
-
-#include "FileLoader.h"
 #include "ActionQueue.h"
-
-#include <glm/gtc/quaternion.hpp>
 
 struct Entity
 {
@@ -31,38 +18,14 @@ struct Entity
 	glm::vec3 scale;
 };
 
-struct Plane
-{
-	std::vector<float> vertices;
-	std::vector<unsigned int> indices;
-	unsigned int VAO;
-	unsigned int EBO;
-	glm::vec3 position;
-};
-
-struct WorldInformation
-{
-	glm::vec3 cameraPosition = glm::vec3();
-	glm::mat4 projection = glm::mat4();
-	glm::mat4 view = glm::mat4();
-	glm::vec3 lightPosition = glm::vec3();
-};
-
-void render_model(Model* model, glm::vec3 pos, glm::vec3 rotation, glm::vec3 scale);
-
-void render_cube(unsigned int& cubeProgram);
-
 int initialize_window(GLFWwindow*& window);
+
 void create_cube(GLuint& vao, GLuint& EBO, int& skyBoxSize, int& skyBoxIndexSize);
 void process_input(GLFWwindow*& window);
 
-void process_uniforms(unsigned int& program, WorldInformation& worldInformation, glm::mat4& worldMatrix);
 void initialize_world_information(WorldInformation& worldInformation);
 
-void render_plane(unsigned int& planeProgram, Plane& plane);
 void generate_landscape_chunk(const glm::vec2 currentChunkCord, const glm::vec3 position, const int size, float hScale, float xzScale, glm::vec3 offset, int concurrencyLevel = -1);
-
-void render_skybox(unsigned int& skyProgram);
 
 void create_shaders(Renderer& renderer);
 
@@ -70,7 +33,7 @@ void mouse_call_back(GLFWwindow* window, double xPos, double yPos);
 
 void key_call_back(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-void check_nearby_planes();
+void check_visible_planes();
 void load_textures();
 
 void load_models(std::vector<Entity>& entities);
@@ -88,46 +51,36 @@ float cameraYaw, cameraPitch;
 float lastX, lastY;
 bool firstMouse = true;
 
-struct vec2compare {
-	bool operator()(const glm::vec2& lhs, const glm::vec2& rhs) const {
-		if (lhs.x != rhs.x)
-			return lhs.x < rhs.x;
-		return lhs.y < rhs.y;
+struct vec2compare
+{
+	bool operator()(const glm::vec2& a, const glm::vec2& b) const
+	{
+		if (a.x != b.x)
+			return a.x < b.x;
+		return a.y < b.y;
 	}
 };
-
-const glm::vec3 topColor = glm::vec3(68.0 / 255.0, 118.0 / 255.0, 189.0 / 255.0);
-const glm::vec3 botColor = glm::vec3(188.0 / 255.0, 214.0 / 255.0, 231.0 / 255.0);
-
-glm::vec3 sunColor = glm::vec3(1.0, 200.0 / 255.0, 50.0 / 255.0);
 
 GLuint skyBoxProgram, cubeProgram, terrainProgram, modelProgram;
 
 glm::quat camQuaternion = glm::quat(glm::vec3(glm::radians(cameraPitch), glm::radians(cameraYaw), 0.0f));
 
-GLuint cubeVao, cubeEbo;
-int cubeSize, cubeIndexSize;
-
-//terrain data
-GLuint terrainVAO, terrainIndexCount;
-
-GLuint cubeDiffuse, cubeNormal;
-
-GLuint grass, rock, snow, sand, dirt;
-
 std::vector<Entity> entities;
 
-std::vector<Plane> terrainChunks;
-std::vector<glm::vec2> currentPositions;
-
-//std::vector<Plane> activeTerrainChunks;
 std::map<glm::vec2, Plane, vec2compare> activeTerrainChunks;
 
 const int chunkSize = 241;
-int systemThreadsCount;
 
-const int maxViewDistance = 600;
-ActionQueue actionQueue;
+const int xScale = 5;
+
+int systemThreadsCount;
+const int maxViewDistance = 400;
+
+ThreadPool threadPool(std::thread::hardware_concurrency());
+
+Renderer renderer;
+
+Cube cube;
 
 int main()
 {
@@ -138,32 +91,12 @@ int main()
 
 	if (result != 0) return result;
 
-	ThreadPool threadPool(systemThreadsCount);
-
 	create_cube(skyBoxVao, skyBoxEbo, skyBoxSize, skyBoxIndexSize);
-	create_cube(cubeVao, cubeEbo, cubeSize, cubeIndexSize);
+	create_cube(cube.VAO, cube.EBO, cube.size, cube.IndexSize);
 
-	Renderer renderer;
 	create_shaders(renderer);
 
-	const float xzScale = 5.0f;
-	const float chunkOffset = (chunkSize - 1) * xzScale;
-
 	int count = 0;
-
-	//auto concurrency = (systemThreadsCount - 9) / 9;
-
-	//for (int i = -2; i < 3; ++i)
-	//{
-	//	for (int z = -2; z < 3; ++z)
-	//	{
-	//		++count;
-
-	//		glm::vec3 chunkPosition(i * chunkOffset, 0.0f, z * chunkOffset);
-	//		std::thread thread(generate_landscape_chunk, chunkPosition, chunkSize, 400.0f, xzScale, glm::vec3(chunkPosition.x, 0.0f, chunkPosition.z), concurrency);
-	//		thread.detach();
-	//	}
-	//}
 
 	load_models(entities);
 	load_textures();
@@ -192,26 +125,24 @@ int main()
 		//input
 		process_input(window);
 
-		////rendering
-		render_skybox(skyBoxProgram);
-		render_cube(cubeProgram);
-
 		//Update Sun Color.
 		worldInformation.lightPosition = glm::vec3(glm::cos(time * 0.3f), glm::sin(time * 0.3f), 0.0f);
 
-		renderer.RenderLoop(window);
-
-		check_nearby_planes();
-
-		for (auto& plane : activeTerrainChunks)
-		{
-			render_plane(terrainProgram, plane.second);
-		}
+		////rendering
+		renderer.render_skybox(skyBoxProgram, worldInformation, skyBoxVao, skyBoxIndexSize);
+		renderer.render_cube(cubeProgram, worldInformation, cube);
 
 		for (auto& entity : entities)
 		{
-			render_model(entity.model, entity.position, entity.rotation, entity.scale);
+			renderer.render_model(entity.model, modelProgram, worldInformation, entity.position, entity.rotation, entity.scale);
 		}
+
+		for (auto& plane : activeTerrainChunks)
+		{
+			renderer.render_plane(terrainProgram, plane.second, worldInformation);
+		}
+
+		check_visible_planes();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -233,14 +164,14 @@ int main()
 	return 0;
 }
 
-void check_nearby_planes()
+void check_visible_planes()
 {
 	const int size = chunkSize - 1;
 	auto visibleChunks = static_cast<int>(std::round(maxViewDistance / size));
-	const float chunkOffset = size * 5.0f;
+	const float chunkOffset = size * xScale;
 
 	auto cameraPos = worldInformation.cameraPosition;
-	glm::vec2 currentCord = glm::vec2(std::round(cameraPos.x / chunkSize), std::round(cameraPos.z / chunkSize));
+	glm::vec2 currentCord = glm::vec2(floor(cameraPos.x / chunkSize), floor(cameraPos.z / chunkSize));
 
 	for (int yOffset = -visibleChunks; yOffset <= visibleChunks; ++yOffset)
 	{
@@ -258,7 +189,11 @@ void check_nearby_planes()
 				glm::vec3 chunkWorldPos = glm::vec3(currentChunkCord.x * chunkOffset, 0.0f, currentChunkCord.y * chunkOffset);
 				activeTerrainChunks.insert({ currentChunkCord, Plane() });
 
-				std::thread(generate_landscape_chunk, currentChunkCord, chunkWorldPos, chunkSize, 400.0f, 5.0f, chunkWorldPos, 1).detach();
+				//Queue it to the threadpool for execution.
+				threadPool.enqueue([=]()
+					{
+						generate_landscape_chunk(currentChunkCord, chunkWorldPos, chunkSize, 400.0f, xScale, chunkWorldPos, 1);
+					});
 			}
 		}
 	}
@@ -289,38 +224,6 @@ void load_models(std::vector<Entity>& entities)
 	entities.push_back(templeEntity);
 }
 
-void render_model(Model* model, glm::vec3 pos, glm::vec3 rotation, glm::vec3 scale)
-{
-	//glEnable(GL_BLEND);
-	//Alpha Blend.
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//Additive
-	//glBlendFunc(GL_ONE, GL_ONE);
-	//Sort Additive
-	//glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
-	//Multiply
-	//glBlendFunc(GL_DST_COLOR, GL_ZERO);
-	//Double Multiply
-	//glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH);
-	glEnable(GL_DEPTH_TEST);
-	glCullFace(GL_BACK);
-
-	glUseProgram(modelProgram);
-
-	glm::mat4 world = glm::mat4(1.0f);
-	world = glm::translate(world, pos);
-	world = world * glm::mat4_cast(glm::quat(rotation));
-	world = glm::scale(world, scale);
-
-	process_uniforms(modelProgram, worldInformation, world);
-	model->Draw(modelProgram);
-
-	glDisable(GL_BLEND);
-}
-
 void create_shaders(Renderer& renderer)
 {
 	renderer.Intialize(cubeProgram);
@@ -344,11 +247,11 @@ void key_call_back(GLFWwindow* window, int key, int scancode, int action, int mo
 void load_textures()
 {
 	//Textures for the terrain.
-	dirt = FileLoader::LoadGLTexture("Resources/Textures/dirt.jpg");
-	sand = FileLoader::LoadGLTexture("Resources/Textures/sand.jpg");
-	grass = FileLoader::LoadGLTexture("Resources/Textures/grass.png", 4);
-	rock = FileLoader::LoadGLTexture("Resources/Textures/rock.jpg");
-	snow = FileLoader::LoadGLTexture("Resources/Textures/snow.jpg");
+	renderer.dirt = FileLoader::load_GL_texture("Resources/Textures/dirt.jpg");
+	renderer.sand = FileLoader::load_GL_texture("Resources/Textures/sand.jpg");
+	renderer.grass = FileLoader::load_GL_texture("Resources/Textures/grass.png", 4);
+	renderer.rock = FileLoader::load_GL_texture("Resources/Textures/rock.jpg");
+	renderer.snow = FileLoader::load_GL_texture("Resources/Textures/snow.jpg");
 
 	glUseProgram(terrainProgram);
 
@@ -368,40 +271,11 @@ void load_textures()
 	glUniform1i(glGetUniformLocation(modelProgram, "texture_ao1"), 4);
 
 	//Textures for the Box.
-	cubeDiffuse = FileLoader::LoadGLTexture("Resources/Textures/container2.png");
-	cubeNormal = FileLoader::LoadGLTexture("Resources/Textures/container2_normal.png");
-}
+	auto cubeDiffuse = FileLoader::load_GL_texture("Resources/Textures/container2.png");
+	auto cubeNormal = FileLoader::load_GL_texture("Resources/Textures/container2_normal.png");
 
-void render_plane(unsigned int& planeProgram, Plane& plane)
-{
-	glEnable(GL_DEPTH);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
-	glUseProgram(planeProgram);
-
-	glm::mat4 world = glm::mat4(1.0f);
-	world = glm::translate(world, plane.position);
-
-	process_uniforms(planeProgram, worldInformation, world);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, dirt);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, sand);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, grass);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, rock);
-
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, snow);
-
-	glBindVertexArray(plane.VAO);
-	glDrawElements(GL_TRIANGLES, plane.indices.size() * sizeof(unsigned int), GL_UNSIGNED_INT, 0);
-	glUseProgram(0);
+	cube.Textures.push_back(cubeDiffuse);
+	cube.Textures.push_back(cubeNormal);
 }
 
 void initialize_world_information(WorldInformation& worldInformation)
@@ -454,74 +328,6 @@ void mouse_call_back(GLFWwindow* window, double xPos, double yPos)
 	glm::vec3 camUp = camQuaternion * glm::vec3(0, 1, 0);
 
 	worldInformation.view = glm::lookAt(worldInformation.cameraPosition, worldInformation.cameraPosition + camForward, camUp);
-}
-
-void render_cube(unsigned int& cubeProgram)
-{
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_DEPTH);
-	glEnable(GL_DEPTH_TEST);
-	glCullFace(GL_BACK);
-
-	glUseProgram(cubeProgram);
-
-	glm::mat4 world = glm::mat4(1.0f);
-	world = glm::translate(world, glm::vec3(0, 100, 0));
-	world = world * glm::mat4_cast(glm::quat(glm::vec3(0, 0.5f, 0)));
-	world = glm::scale(world, glm::vec3(50));
-
-	process_uniforms(cubeProgram, worldInformation, world);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, cubeDiffuse);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, cubeNormal);
-
-	glBindVertexArray(cubeVao);
-	glDrawElements(GL_TRIANGLES, cubeIndexSize, GL_UNSIGNED_INT, 0);
-
-	glUseProgram(0);
-}
-
-void render_skybox(unsigned int& skyProgram)
-{
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH);
-	glDisable(GL_DEPTH_TEST);
-
-	glUseProgram(skyProgram);
-
-	glm::mat4 world = glm::mat4(1.0f);
-	world = glm::translate(world, worldInformation.cameraPosition);
-	world = glm::scale(world, glm::vec3(100.0f, 100.0f, 100.0f));
-
-	process_uniforms(skyProgram, worldInformation, world);
-
-	glBindVertexArray(skyBoxVao);
-	glDrawElements(GL_TRIANGLES, skyBoxIndexSize, GL_UNSIGNED_INT, 0);
-
-	glEnable(GL_DEPTH);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-	glUseProgram(0);
-}
-
-void process_uniforms(unsigned int& program, WorldInformation& worldInformation, glm::mat4& worldMatrix)
-{
-	glUniformMatrix4fv(glGetUniformLocation(program, "world"), 1, GL_FALSE, glm::value_ptr(worldMatrix));
-	//V = value pointer, sturen referentie naar instance door.
-	glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, glm::value_ptr(worldInformation.projection));
-	glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(worldInformation.view));
-
-	glUniform3fv(glGetUniformLocation(program, "sunColor"), 1, glm::value_ptr(sunColor));
-
-	glUniform3fv(glGetUniformLocation(program, "topColor"), 1, glm::value_ptr(topColor));
-	glUniform3fv(glGetUniformLocation(program, "botColor"), 1, glm::value_ptr(botColor));
-
-	glUniform3fv(glGetUniformLocation(program, "lightDirection"), 1, glm::value_ptr(worldInformation.lightPosition));
-	glUniform3fv(glGetUniformLocation(program, "cameraPosition"), 1, glm::value_ptr(worldInformation.cameraPosition));
 }
 
 void process_input(GLFWwindow*& window)
@@ -767,14 +573,12 @@ void process_plane(const glm::vec2 currentChunkCord, const glm::vec3 position, c
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
-	// vertex information!
-	// position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0);
 	glEnableVertexAttribArray(0);
-	// normal
+
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * 3));
 	glEnableVertexAttribArray(1);
-	// uv
+
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * 6));
 	glEnableVertexAttribArray(2);
 
@@ -789,8 +593,8 @@ void process_plane(const glm::vec2 currentChunkCord, const glm::vec3 position, c
 	plane.indices = indices;
 	plane.position = position;
 
+	//Replace the place holder placed during the dispatch, with the generated plane.
 	activeTerrainChunks.insert_or_assign(currentChunkCord, std::move(plane));
-	//terrainChunks.push_back(std::move(plane));
 }
 
 void generate_landscape_chunk(const glm::vec2 currentChunkCord, const glm::vec3 position, const int size, float hScale, float xzScale, glm::vec3 offset, int concurrencyLevel)
@@ -868,12 +672,10 @@ void generate_landscape_chunk(const glm::vec2 currentChunkCord, const glm::vec3 
 
 			glm::vec3 cross = glm::cross(glm::vec3(1), glm::vec3(1));
 
-			//Normals
 			vertices[vertexIndex++] = 0.0f;
 			vertices[vertexIndex++] = 0.0f;
 			vertices[vertexIndex++] = 0.0f;
 
-			//Uvs
 			vertices[vertexIndex++] = x / (float)size;
 			vertices[vertexIndex++] = z / (float)size;
 		}
@@ -903,7 +705,7 @@ void generate_landscape_chunk(const glm::vec2 currentChunkCord, const glm::vec3 
 
 	calculate_normals(vertices, stride, size, size);
 
-	//Deffer it to the main thread.
+	//Deffer finalization to the main thread.
 	ActionQueue::shared_instance().AddActionToQueue([=, indices = std::move(indices), vertices = std::move(vertices)]() mutable
 		{
 			process_plane(currentChunkCord, position, indices, vertices);
