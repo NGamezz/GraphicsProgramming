@@ -14,6 +14,11 @@ void Renderer::Intialize(GLuint& program)
 	glUniform1i(glGetUniformLocation(program, "normalTex"), 1);
 }
 
+void create_programs()
+{
+
+}
+
 void Renderer::createProgram(GLuint& programId, const char* vertex, const char* fragment)
 {
 	auto vertexFuture = FileLoader::LoadFileAsync(vertex);

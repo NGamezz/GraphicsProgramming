@@ -31,6 +31,15 @@ struct Entity
 	glm::vec3 scale;
 };
 
+struct Plane
+{
+	std::vector<float> vertices;
+	std::vector<unsigned int> indices;
+	unsigned int VAO;
+	unsigned int EBO;
+	glm::vec3 position;
+};
+
 struct WorldInformation
 {
 	glm::vec3 cameraPosition = glm::vec3();
@@ -50,8 +59,8 @@ void process_input(GLFWwindow*& window);
 void process_uniforms(unsigned int& program, WorldInformation& worldInformation, glm::mat4& worldMatrix);
 void initialize_world_information(WorldInformation& worldInformation);
 
-void render_plane(unsigned int& planeProgram);
-unsigned int generate_landscape_chunk(const int size, float hScale, float xzScale, unsigned int& indexCount, int concurrencyLevel = -1);
+void render_plane(unsigned int& planeProgram, Plane& plane);
+void generate_landscape_chunk(const glm::vec2 currentChunkCord, const glm::vec3 position, const int size, float hScale, float xzScale, glm::vec3 offset, int concurrencyLevel = -1);
 
 void render_skybox(unsigned int& skyProgram);
 
@@ -61,6 +70,7 @@ void mouse_call_back(GLFWwindow* window, double xPos, double yPos);
 
 void key_call_back(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+void check_nearby_planes();
 void load_textures();
 
 void load_models(std::vector<Entity>& entities);
@@ -68,9 +78,6 @@ void load_models(std::vector<Entity>& entities);
 bool keys[1024];
 
 const int width = 1280, height = 720;
-
-//Used for deferring actions to the main thread loop.
-ActionQueue actionQueue;
 
 WorldInformation worldInformation;
 
@@ -81,8 +88,16 @@ float cameraYaw, cameraPitch;
 float lastX, lastY;
 bool firstMouse = true;
 
-glm::vec3 topColor = glm::vec3(68.0 / 255.0, 118.0 / 255.0, 189.0 / 255.0);
-glm::vec3 botColor = glm::vec3(188.0 / 255.0, 214.0 / 255.0, 231.0 / 255.0);
+struct vec2compare {
+	bool operator()(const glm::vec2& lhs, const glm::vec2& rhs) const {
+		if (lhs.x != rhs.x)
+			return lhs.x < rhs.x;
+		return lhs.y < rhs.y;
+	}
+};
+
+const glm::vec3 topColor = glm::vec3(68.0 / 255.0, 118.0 / 255.0, 189.0 / 255.0);
+const glm::vec3 botColor = glm::vec3(188.0 / 255.0, 214.0 / 255.0, 231.0 / 255.0);
 
 glm::vec3 sunColor = glm::vec3(1.0, 200.0 / 255.0, 50.0 / 255.0);
 
@@ -90,7 +105,7 @@ GLuint skyBoxProgram, cubeProgram, terrainProgram, modelProgram;
 
 glm::quat camQuaternion = glm::quat(glm::vec3(glm::radians(cameraPitch), glm::radians(cameraYaw), 0.0f));
 
-GLuint cubeVao, cubeEbo; 
+GLuint cubeVao, cubeEbo;
 int cubeSize, cubeIndexSize;
 
 //terrain data
@@ -102,27 +117,55 @@ GLuint grass, rock, snow, sand, dirt;
 
 std::vector<Entity> entities;
 
+std::vector<Plane> terrainChunks;
+std::vector<glm::vec2> currentPositions;
+
+//std::vector<Plane> activeTerrainChunks;
+std::map<glm::vec2, Plane, vec2compare> activeTerrainChunks;
+
+const int chunkSize = 241;
+int systemThreadsCount;
+
+const int maxViewDistance = 600;
+ActionQueue actionQueue;
+
 int main()
 {
+	systemThreadsCount = std::thread::hardware_concurrency();
+
 	GLFWwindow* window = nullptr;
 	auto result = initialize_window(window);
 
 	if (result != 0) return result;
 
-	int concurrency = std::thread::hardware_concurrency();
-	ThreadPool threadPool(concurrency);
+	ThreadPool threadPool(systemThreadsCount);
 
 	create_cube(skyBoxVao, skyBoxEbo, skyBoxSize, skyBoxIndexSize);
-
 	create_cube(cubeVao, cubeEbo, cubeSize, cubeIndexSize);
 
 	Renderer renderer;
 	create_shaders(renderer);
 
-	terrainVAO = generate_landscape_chunk(1000.0f, 100.0f, 5.0f, terrainIndexCount);
+	const float xzScale = 5.0f;
+	const float chunkOffset = (chunkSize - 1) * xzScale;
+
+	int count = 0;
+
+	//auto concurrency = (systemThreadsCount - 9) / 9;
+
+	//for (int i = -2; i < 3; ++i)
+	//{
+	//	for (int z = -2; z < 3; ++z)
+	//	{
+	//		++count;
+
+	//		glm::vec3 chunkPosition(i * chunkOffset, 0.0f, z * chunkOffset);
+	//		std::thread thread(generate_landscape_chunk, chunkPosition, chunkSize, 400.0f, xzScale, glm::vec3(chunkPosition.x, 0.0f, chunkPosition.z), concurrency);
+	//		thread.detach();
+	//	}
+	//}
 
 	load_models(entities);
-
 	load_textures();
 
 	initialize_world_information(worldInformation);
@@ -151,14 +194,19 @@ int main()
 
 		////rendering
 		render_skybox(skyBoxProgram);
-		render_plane(terrainProgram);
 		render_cube(cubeProgram);
 
 		//Update Sun Color.
-		sunColor = glm::vec3(glm::sin(time), sin(time * 0.5f), glm::cos(time));
 		worldInformation.lightPosition = glm::vec3(glm::cos(time * 0.3f), glm::sin(time * 0.3f), 0.0f);
 
 		renderer.RenderLoop(window);
+
+		check_nearby_planes();
+
+		for (auto& plane : activeTerrainChunks)
+		{
+			render_plane(terrainProgram, plane.second);
+		}
 
 		for (auto& entity : entities)
 		{
@@ -169,8 +217,8 @@ int main()
 		glfwPollEvents();
 
 		//Clear queued functions
-		if (!actionQueue.IsEmpty())
-			actionQueue.ClearFunctionQueue();
+		if (!ActionQueue::shared_instance().IsEmpty())
+			ActionQueue::shared_instance().ClearFunctionQueue();
 	}
 
 	//Dispose of entity pointers.
@@ -183,6 +231,37 @@ int main()
 	threadPool.~ThreadPool();
 	glfwTerminate();
 	return 0;
+}
+
+void check_nearby_planes()
+{
+	const int size = chunkSize - 1;
+	auto visibleChunks = static_cast<int>(std::round(maxViewDistance / size));
+	const float chunkOffset = size * 5.0f;
+
+	auto cameraPos = worldInformation.cameraPosition;
+	glm::vec2 currentCord = glm::vec2(std::round(cameraPos.x / chunkSize), std::round(cameraPos.z / chunkSize));
+
+	for (int yOffset = -visibleChunks; yOffset <= visibleChunks; ++yOffset)
+	{
+		for (int xOffset = -visibleChunks; xOffset <= visibleChunks; ++xOffset)
+		{
+			glm::vec2 currentChunkCord = glm::vec2((xOffset + currentCord.x), (yOffset + currentCord.y));
+
+			if (activeTerrainChunks.contains(currentChunkCord))
+			{
+				//Need to deactivate non active ones.
+				continue;
+			}
+			else
+			{
+				glm::vec3 chunkWorldPos = glm::vec3(currentChunkCord.x * chunkOffset, 0.0f, currentChunkCord.y * chunkOffset);
+				activeTerrainChunks.insert({ currentChunkCord, Plane() });
+
+				std::thread(generate_landscape_chunk, currentChunkCord, chunkWorldPos, chunkSize, 400.0f, 5.0f, chunkWorldPos, 1).detach();
+			}
+		}
+	}
 }
 
 void load_models(std::vector<Entity>& entities)
@@ -293,7 +372,7 @@ void load_textures()
 	cubeNormal = FileLoader::LoadGLTexture("Resources/Textures/container2_normal.png");
 }
 
-void render_plane(unsigned int& planeProgram)
+void render_plane(unsigned int& planeProgram, Plane& plane)
 {
 	glEnable(GL_DEPTH);
 	glEnable(GL_DEPTH_TEST);
@@ -303,6 +382,7 @@ void render_plane(unsigned int& planeProgram)
 	glUseProgram(planeProgram);
 
 	glm::mat4 world = glm::mat4(1.0f);
+	world = glm::translate(world, plane.position);
 
 	process_uniforms(planeProgram, worldInformation, world);
 
@@ -319,8 +399,8 @@ void render_plane(unsigned int& planeProgram)
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, snow);
 
-	glBindVertexArray(terrainVAO);
-	glDrawElements(GL_TRIANGLES, terrainIndexCount, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(plane.VAO);
+	glDrawElements(GL_TRIANGLES, plane.indices.size() * sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 	glUseProgram(0);
 }
 
@@ -624,13 +704,13 @@ void create_cube(GLuint& VAO, GLuint& EBO, int& size, int& numIndices)
 	glEnableVertexAttribArray(5);
 }
 
-static inline glm::vec3 get_vertex(const float* vertices, const int width, const int x, const int z, const int stride) {
+static inline glm::vec3 get_vertex(const std::vector<float>& vertices, const int width, const int x, const int z, const int stride) {
 	int index = (z * width + x) * stride;
 	return glm::vec3(vertices[index], vertices[index + 1], vertices[index + 2]);
 }
 
 //This function has been made with the help of chat gpt and adjusted later.
-static void calculate_normals(float* vertices, const int stride, const int height, const int width)
+static void calculate_normals(std::vector<float>& vertices, const int stride, const int height, const int width)
 {
 	for (unsigned int i = 0; i < (height - 1) * (width - 1); ++i)
 	{
@@ -671,21 +751,61 @@ static void calculate_normals(float* vertices, const int stride, const int heigh
 	}
 }
 
-unsigned int generate_landscape_chunk(const int size, float hScale, float xzScale, unsigned int& indexCount, int concurrencyLevel)
+void process_plane(const glm::vec2 currentChunkCord, const glm::vec3 position, const std::vector<unsigned int>& indices, const std::vector<float>& vertices)
+{
+	const int stride = 8;
+	unsigned int VAO, VBO, EBO;
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+
+	// vertex information!
+	// position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0);
+	glEnableVertexAttribArray(0);
+	// normal
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * 3));
+	glEnableVertexAttribArray(1);
+	// uv
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * 6));
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	Plane plane{};
+
+	plane.VAO = VAO;
+	plane.EBO = EBO;
+	plane.vertices = vertices;
+	plane.indices = indices;
+	plane.position = position;
+
+	activeTerrainChunks.insert_or_assign(currentChunkCord, std::move(plane));
+	//terrainChunks.push_back(std::move(plane));
+}
+
+void generate_landscape_chunk(const glm::vec2 currentChunkCord, const glm::vec3 position, const int size, float hScale, float xzScale, glm::vec3 offset, int concurrencyLevel)
 {
 	const int stride = 8;
 	int count = size * size;
 
 	const int gridSize = 400;
+	const int octaves = 8;
 
-	const int octaves = 5;
-
-	float* vertices = new float[count * stride];
-	unsigned int* indices = new unsigned int[(size - 1) * (size - 1) * 6];
+	std::vector<float> vertices(count * stride);
+	std::vector<unsigned int> indices((size - 1) * (size - 1) * 6);
 
 	//Calculate Batch Size based on concurrency level.
-	int hardWareConcurrency = std::thread::hardware_concurrency();
-	int threadCount = concurrencyLevel == -1 || concurrencyLevel > hardWareConcurrency - 1 ? hardWareConcurrency - 1 : concurrencyLevel;
+	int threadCount = concurrencyLevel < 1 || concurrencyLevel > systemThreadsCount - 1 ? systemThreadsCount - 1 : concurrencyLevel;
 	int batchSize = count / threadCount;
 	int batches = count / batchSize;
 
@@ -705,12 +825,14 @@ unsigned int generate_landscape_chunk(const int size, float hScale, float xzScal
 					int x = loopIndex % size;
 					int z = loopIndex / size;
 
-					vertices[vertexIndex++] = x * xzScale;
+					float globalX = x * xzScale;
+					float globalZ = z * xzScale;
 
-					float perlinValue = perlin_noise::octaved_perlin_noise(x, z, octaves, gridSize);
+					vertices[vertexIndex++] = globalX;
+					float perlinValue = perlin_noise::octaved_perlin_noise(globalX + offset.x, globalZ + offset.z, octaves, gridSize);
 
-					vertices[vertexIndex++] = perlinValue * 500.0f;
-					vertices[vertexIndex++] = z * xzScale;
+					vertices[vertexIndex++] = perlinValue * hScale;
+					vertices[vertexIndex++] = globalZ;
 
 					vertices[vertexIndex++] = 0.0f;
 					vertices[vertexIndex++] = 0.0f;
@@ -722,7 +844,7 @@ unsigned int generate_landscape_chunk(const int size, float hScale, float xzScal
 			});
 	}
 
-	//Process Remainder
+	//Process Remainder while other batches are being processed.
 	int remaining = count % threadCount;
 
 	if (remaining > 0)
@@ -735,19 +857,18 @@ unsigned int generate_landscape_chunk(const int size, float hScale, float xzScal
 			int x = i % size;
 			int z = i / size;
 
-			vertices[vertexIndex++] = x * xzScale;
+			float globalX = x * xzScale;
+			float globalZ = z * xzScale;
 
-			float frequency = 1.0f;
-			float amplitude = 1.0f;
+			vertices[vertexIndex++] = globalX;
+			float perlinValue = perlin_noise::octaved_perlin_noise(globalX + offset.x, globalZ + offset.z, octaves, gridSize);
 
-			float perlinValue = perlin_noise::octaved_perlin_noise(x, z, octaves, gridSize);
-
-			vertices[vertexIndex++] = perlinValue * 500.0f;
-			vertices[vertexIndex++] = z * xzScale;
+			vertices[vertexIndex++] = perlinValue * hScale;
+			vertices[vertexIndex++] = globalZ;
 
 			glm::vec3 cross = glm::cross(glm::vec3(1), glm::vec3(1));
 
-			//
+			//Normals
 			vertices[vertexIndex++] = 0.0f;
 			vertices[vertexIndex++] = 0.0f;
 			vertices[vertexIndex++] = 0.0f;
@@ -780,40 +901,11 @@ unsigned int generate_landscape_chunk(const int size, float hScale, float xzScal
 		indices[index++] = vertex + 1;
 	}
 
-	indexCount = ((size - 1) * (size - 1) * 6);
-
 	calculate_normals(vertices, stride, size, size);
 
-	unsigned long vertSize = (static_cast<unsigned long long>(size) * size) * stride * sizeof(float);
-
-	unsigned int VAO, VBO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertSize, vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
-	// vertex information!
-	// position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0);
-	glEnableVertexAttribArray(0);
-	// normal
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * 3));
-	glEnableVertexAttribArray(1);
-	// uv
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * 6));
-	glEnableVertexAttribArray(2);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	delete[] vertices;
-	delete[] indices;
-
-	return VAO;
+	//Deffer it to the main thread.
+	ActionQueue::shared_instance().AddActionToQueue([=, indices = std::move(indices), vertices = std::move(vertices)]() mutable
+		{
+			process_plane(currentChunkCord, position, indices, vertices);
+		});
 }

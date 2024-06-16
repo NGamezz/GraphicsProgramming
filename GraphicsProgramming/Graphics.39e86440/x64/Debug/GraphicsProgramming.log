@@ -1,6 +1,16 @@
-﻿  Renderer.cpp
-C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\FileLoader.h(17,2): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
-  (compiling source file 'Renderer.cpp')
-  
-  GraphicsProgramming.vcxproj -> C:\Users\ninja\Desktop\Copy Of Graphics Programming\GraphicsProgramming\x64\Debug\GraphicsProgramming.exe
+﻿  main.cpp
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\FileLoader.h(11,14): warning C4091: 'static ': ignored on left of 'FileLoader' when no variable is declared
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\perlin_noise.hpp(67,18): warning C4554: '>>': check operator precedence for possible error; use parentheses to clarify precedence
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\perlin_noise.hpp(70,18): warning C4554: '>>': check operator precedence for possible error; use parentheses to clarify precedence
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\perlin_noise.hpp(72,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\perlin_noise.hpp(94,55): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\ActionQueue.h(28,13): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\main.cpp(361,52): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\main.cpp(673,29): warning C4018: '<': signed/unsigned mismatch
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\main.cpp(747,64): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\main.cpp(747,61): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\main.cpp(780,62): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\main.cpp(780,59): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+C:\GitFork\GraphicsProgramming\GraphicsProgramming\main.cpp(805,29): warning C4018: '<': signed/unsigned mismatch
+  GraphicsProgramming.vcxproj -> C:\GitFork\GraphicsProgramming\GraphicsProgramming\x64\Debug\GraphicsProgramming.exe
   0 File(s) copied

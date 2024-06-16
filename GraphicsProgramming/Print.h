@@ -14,4 +14,5 @@ private:
 
 inline void Print::PrintAsync(const char* thingToPrint)
 {
+	std::cout << thingToPrint << std::endl;
 }

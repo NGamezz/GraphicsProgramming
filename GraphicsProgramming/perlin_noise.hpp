@@ -1,16 +1,11 @@
 #pragma once
 #include <corecrt_math.h>
 
-typedef struct
-{
-	float x, y;
-} Vector2;
-
 class perlin_noise
 {
 public:
 	static float octaved_perlin_noise(const float x, const float y, const int octaves, const int size);
-	static Vector2 get_random_gradient(const int ix, const int iy);
+	static glm::vec2 get_random_gradient(const int ix, const int iy);
 	static float regular_perlin_noise(const float x, const float z);
 	static float dot_grid_gradient(const int ix, const int iy, const float x, const float y);
 	static float interpolate(const float a, const float b, const float value);
@@ -22,21 +17,32 @@ inline float perlin_noise::octaved_perlin_noise(const float x, const float y, co
 	float frequency = 1.0f;
 	float amplitude = 1.0f;
 
-	for (int octave = 0; octave < 12; ++octave)
+	float maxValue = 0.0f;
+
+	for (int octave = 0; octave < octaves; ++octave)
 	{
-		perlinValue += regular_perlin_noise(x * frequency / size, y * frequency / size) * amplitude;
+		float sampleX = x / size * frequency;
+		float sampleY = y / size * frequency;
+
+		float val = regular_perlin_noise(sampleX, sampleY) * amplitude;
+
+		perlinValue += val;
+
+		maxValue += amplitude;
 
 		amplitude *= 0.5f;
-		frequency *= 2;
+		frequency *= 2.0f;
 	}
+
+	perlinValue = (perlinValue + 1) / maxValue;
 
 	return perlinValue;
 }
 
 inline float perlin_noise::regular_perlin_noise(const float x, const float z)
 {
-	int xGrid = (int)x;
-	int yGrid = (int)z;
+	int xGrid = floor(x);
+	int yGrid = floor(z);
 	int xGridB = xGrid + 1;
 	int yGridB = yGrid + 1;
 
@@ -56,7 +62,8 @@ inline float perlin_noise::regular_perlin_noise(const float x, const float z)
 	return value;
 }
 
-inline Vector2 perlin_noise::get_random_gradient(const int ix, const int iy)
+//This Hashing function has been acquired from the internet.
+inline glm::vec2 perlin_noise::get_random_gradient(const int ix, const int iy)
 {
 	// No precomputed gradients mean this works for any number of grid coordinates
 	const unsigned int w = 8 * sizeof(unsigned);
@@ -72,7 +79,7 @@ inline Vector2 perlin_noise::get_random_gradient(const int ix, const int iy)
 	float random = a * (3.14159265 / ~(~0u >> 1)); // in [0, 2*Pi]
 
 	// Create the vector from the angle
-	Vector2 v{};
+	glm::vec2 v{};
 	v.x = sin(random);
 	v.y = cos(random);
 
@@ -81,7 +88,7 @@ inline Vector2 perlin_noise::get_random_gradient(const int ix, const int iy)
 
 inline float perlin_noise::dot_grid_gradient(const int ix, const int iy, const float x, const float y)
 {
-	Vector2 gradient = perlin_noise::get_random_gradient(ix, iy);
+	glm::vec2 gradient = perlin_noise::get_random_gradient(ix, iy);
 
 	float dx = x - (float)ix;
 	float dy = y - (float)iy;

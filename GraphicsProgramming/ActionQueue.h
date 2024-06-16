@@ -7,6 +7,7 @@
 class ActionQueue
 {
 public:
+	static ActionQueue& shared_instance() { static ActionQueue queue; return queue; }
 	void AddActionToQueue(std::function<void()> func);
 	void ClearFunctionQueue();
 	bool IsEmpty();
